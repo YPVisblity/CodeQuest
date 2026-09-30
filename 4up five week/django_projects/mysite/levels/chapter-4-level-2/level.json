@@ -1,0 +1,12 @@
+{
+  "id": "chapter-4-level-2",
+  "chapter": "第 4 章第二關",
+  "level": "4-2",
+  "title": "多媒體",
+  "difficulty": "70％",
+  "story_url": "",
+  "description": "建立兩個 Thread，分別執行音訊與影片播放器，讓兩項多媒體工作同步開始",
+  "summary": "學習 threading.Thread、target、args、start 與 join",
+  "warn": "完成程式後提交評測",
+  "unlock_rule": {"cost": 5}
+}

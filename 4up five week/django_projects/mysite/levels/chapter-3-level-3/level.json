@@ -1,0 +1,11 @@
+{
+  "id": "chapter-3-level-3",
+  "chapter": "第 3 章第三關",
+  "level": "3-3",
+  "title": "即時資料",
+  "difficulty": "50%",
+  "story_url": "https://ypvisblity.github.io/chapter_python/3-3/3-3-1.0-web/index.html",
+  "description": "辦公室環境監測系統讀取到空值，AI 未處理 API 空值，需撰寫測試驗證資料清洗邏輯",
+  "summary": "AI 只負責寫程式碼，不負責檢查邏輯是否正確，學生需自行驗證資料清洗的正確性",
+  "warn": "返回題目點選按鈕，進入關卡"
+}

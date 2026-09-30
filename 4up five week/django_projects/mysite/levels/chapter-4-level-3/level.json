@@ -1,0 +1,12 @@
+{
+  "id": "chapter-4-level-3",
+  "chapter": "第 4 章第三關",
+  "level": "4-3",
+  "title": "語音應用",
+  "difficulty": "50％",
+  "story_url": "",
+  "description": "檢查公告文字與輸出格式，使用繁體中文 TTS 產生 MP3 語音檔",
+  "summary": "學習文字轉語音、語言參數、檔案儲存與輸入驗證",
+  "warn": "完成程式後提交評測",
+  "unlock_rule": {"cost": 5}
+}

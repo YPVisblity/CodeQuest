@@ -1,0 +1,4649 @@
+﻿{% load static %}
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- <link rel="preconnect" href="https://ypvisblity.github.io" crossorigin> -->
+    <title>Code Quest</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: #f8fafc;
+            font-family: Arial, "Microsoft JhengHei", sans-serif;
+            background: #0f2130;
+        }
+
+        button,
+        textarea,
+        input {
+            font: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        .shell {
+            min-height: 100vh;
+            background:
+                linear-gradient(135deg, rgba(16, 37, 54, 0.92), rgba(7, 18, 30, 0.84)),
+                url("/static/pages/images/mainbackground.png") center/cover no-repeat;
+        }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            min-height: 78px;
+            padding: 14px clamp(18px, 5vw, 74px);
+            background: #111827;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.26);
+        }
+
+        .logo {
+            color: #facc15;
+            font-size: clamp(26px, 4vw, 42px);
+            font-weight: 900;
+            letter-spacing: 0;
+            text-shadow: 0 4px 0 #5b2b12, 0 8px 0 rgba(0, 0, 0, 0.4);
+            transform: rotate(-2deg);
+        }
+
+        .top-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-pill,
+        .primary-button,
+        .secondary-button,
+        .ai-button,
+        .tab-button {
+            border: 0;
+            border-radius: 8px;
+            font-weight: 800;
+        }
+
+        .nav-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 14px;
+            color: #dbeafe;
+            background: #1f2937;
+            text-decoration: none;
+        }
+
+        .primary-button {
+            padding: 14px 24px;
+            color: #102018;
+            background: #34d399;
+            box-shadow: 0 12px 0 #167853, 0 18px 38px rgba(0, 0, 0, 0.32);
+        }
+        .secondary-button {
+            padding: 11px 16px;
+            color: #f8fafc;
+            background: #334155;
+        }
+        .ai-button {
+            display: inline-block;
+            padding: 14px 24px;
+            color: #10202d;       
+            background: #3b82f6;      
+            box-shadow: 0 12px 0 #1d4ed8, 0 18px 38px rgba(0, 0, 0, 0.32); 
+            /* #可加可不加 
+            border: none;
+            border-radius: 12px;   
+            font-weight: bold;    
+            text-decoration: none; 
+            cursor: pointer; */
+        }
+        
+        .ai-button:hover {
+            background: #60a5fa;
+        }
+        
+        .ai-button:active {
+            box-shadow: 0 4px 0 #1d4ed8, 0 8px 18px rgba(0, 0, 0, 0.32);
+            transform: translateY(8px); 
+        }
+	
+        .start-screen {
+            display: grid;
+            min-height: calc(100vh - 78px);
+            place-items: center;
+            padding: 44px 22px;
+        }
+
+        .start-card {
+            width: min(980px, 100%);
+            text-align: center;
+        }
+
+        .title-frame {
+            width: min(780px, 100%);
+            margin: 0 auto 34px;
+            padding: 28px;
+            border: 5px solid #0b1220;
+            border-radius: 8px;
+            color: #fff7ed;
+            background: rgba(15, 23, 42, 0.74);
+            box-shadow: 0 18px 0 rgba(0, 0, 0, 0.22);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(48px, 10vw, 104px);
+            line-height: 1;
+            letter-spacing: 0;
+        }
+
+        .subtitle {
+            margin: 18px auto 0;
+            max-width: 640px;
+            color: #bfdbfe;
+            font-size: 20px;
+            line-height: 1.7;
+        }
+        
+        #iframeWrap:-webkit-full-screen {
+            width: 100vw;
+            height: 100vh;
+            aspect-ratio: unset;
+            border-radius: 0;
+        }
+
+        #iframeWrap:fullscreen {
+            width: 100vw;
+            height: 100vh;
+            aspect-ratio: unset;
+            border-radius: 0;
+        }
+
+        #iframeWrap:fullscreen iframe {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .level-node.is-locked {
+            opacity: 0.45;
+            filter: grayscale(0.6);
+            cursor: not-allowed;
+        }
+
+        .map-screen {
+            display: none;
+            min-height: calc(100vh - 78px);
+            padding: 26px 0 34px;
+        }
+
+        .map-screen.is-active {
+            display: block;
+        }
+
+        .map-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            padding: 0 clamp(18px, 5vw, 74px) 22px;
+        }
+
+        .map-head h2 {
+            margin: 0;
+            color: #ffffff;
+            font-size: clamp(28px, 4vw, 44px);
+            letter-spacing: 0;
+            text-shadow: 0 4px 0 rgba(0, 0, 0, 0.28);
+        }
+
+        .map-head p {
+            margin: 8px 0 0;
+            color: #cbd5e1;
+        }
+
+        .map-window {
+            position: relative;
+            min-height: 560px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 70px 80px 130px;
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+            background:
+                radial-gradient(circle at 14% 24%, rgba(255, 255, 255, 0.08) 0 46px, transparent 47px),
+                radial-gradient(circle at 46% 68%, rgba(255, 255, 255, 0.07) 0 58px, transparent 59px),
+                radial-gradient(circle at 84% 30%, rgba(255, 255, 255, 0.07) 0 52px, transparent 53px);
+        }
+
+        .map-window::-webkit-scrollbar {
+            height: 14px;
+        }
+
+        .map-window::-webkit-scrollbar-thumb {
+            border-radius: 999px;
+            background: #facc15;
+        }
+
+        .map-track {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 130px;
+            width: max-content;
+            min-width: 1150px;
+            min-height: 360px;
+        }
+        
+        .notebook-wrap {
+            display: flex;
+            flex-direction: column;
+            background: #0d0d1a;
+            border-radius: 8px;
+            overflow: hidden;
+            font-family: 'Fira Code', 'JetBrains Mono', monospace;
+            min-height: 400px;
+        }
+
+                /* AI 小助手按鈕 */
+        .ai-avatar-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            border: 0;
+            border-radius: 50%;
+            background: #3b82f6;
+            box-shadow: 0 8px 0 #1d4ed8, 0 14px 28px rgba(0, 0, 0, 0.32);
+            cursor: pointer;
+            transition: transform 0.15s;
+        }
+        .ai-avatar-btn:hover {
+            transform: translateY(-2px);
+            background: #60a5fa;
+        }
+        .ai-avatar-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 4px 0 #1d4ed8, 0 8px 16px rgba(0, 0, 0, 0.32);
+        }
+        .ai-avatar-icon {
+            font-size: 22px;
+        }
+
+        /* 浮動聊天視窗 */
+        .ai-float-panel {
+            position: fixed;
+            top: 100px;
+            right: 24px;
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            width: 340px;
+            height: 440px;
+            min-width: 260px;
+            min-height: 280px;
+            max-width: 90vw;
+            max-height: 80vh;
+            border: 4px solid #0b1220;
+            border-radius: 10px;
+            background: #0f172a;
+            box-shadow: 0 18px 0 rgba(0, 0, 0, 0.24), 0 24px 48px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+        }
+        .ai-float-panel[hidden] {
+            display: none;
+        }
+
+        .ai-float-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            background: #111827;
+            color: #f8fafc;
+            font-weight: 800;
+            cursor: move;
+            user-select: none;
+            flex-shrink: 0;
+        }
+        .ai-float-title {
+            font-size: 14px;
+        }
+        #aiFloatContext {
+            margin-left: 6px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: #34d399;
+            color: #102018;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .ai-float-close {
+            border: 0;
+            background: transparent;
+            color: #f8fafc;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .ai-float-close:hover {
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .ai-float-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: #0b1120;
+        }
+        .ai-float-msg {
+            max-width: 85%;
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 13px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .ai-float-msg-user {
+            align-self: flex-end;
+            background: #34d399;
+            color: #102018;
+            font-weight: 700;
+            border-bottom-right-radius: 2px;
+        }
+        .ai-float-msg-bot {
+            align-self: flex-start;
+            background: #1e293b;
+            color: #e2e8f0;
+            border-bottom-left-radius: 2px;
+        }
+        .ai-float-msg-loading {
+            align-self: flex-start;
+            color: #64748b;
+            font-size: 12px;
+            font-style: italic;
+        }
+
+        .ai-float-input-row {
+            display: flex;
+            gap: 8px;
+            padding: 10px;
+            background: #111827;
+            align-items: flex-end;
+            flex-shrink: 0;
+        }
+        .ai-float-input {
+            flex: 1 1 auto;
+            resize: none;
+            padding: 6px 10px;
+            border: 2px solid #334155;
+            border-radius: 6px;
+            background: #0f172a;
+            color: #f8fafc;
+            font: inherit;
+            font-size: 13px;
+            line-height: 20px;
+            height: 32px;
+            min-height: 32px;
+            max-height: 80px;
+            box-sizing: border-box;
+            overflow-x: hidden;
+            overflow-y: hidden;
+        }
+        .ai-float-input::-webkit-scrollbar {
+            width: 4px;
+        }
+        .ai-float-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        .ai-float-send {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            border: 0;
+            border-radius: 6px;
+            padding: 0 16px;
+            background: #3b82f6;
+            color: #fff;
+            font-weight: 800;
+            font-size: 13px;
+            height: 32px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .ai-float-send:hover {
+            background: #60a5fa;
+        }
+        .ai-float-send:disabled {
+            background: #475569;
+            cursor: not-allowed;
+        }
+
+        .ai-float-resize {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            width: 18px;
+            height: 18px;
+            cursor: nwse-resize;
+            background: linear-gradient(135deg, transparent 50%, #334155 50%);
+        }
+
+        #notebookWrap:fullscreen,
+        #notebookWrap:-webkit-full-screen {
+            width: 100vw;
+            height: 100vh;
+            border-radius: 0;
+            overflow-y: auto;
+            background: #0d0d1a;
+        }
+
+        .topic-heading {
+            margin: 0 0 16px;
+            color: #111827;
+            font-size: 20px;
+        }
+
+        .topic-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .topic-card {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 6px;
+            padding: 16px;
+            border: 3px solid #111827;
+            border-radius: 8px;
+            background: #fff7ed;
+            box-shadow: 0 6px 0 #d6b98a;
+            cursor: pointer;
+            text-align: left;
+            transition: transform 0.15s;
+
+            width: 210px;        
+            height: 200px;        
+            flex-shrink: 0;       
+
+            overflow-y: auto;     
+            box-sizing: border-box;
+
+        }
+
+        .topic-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .topic-id {
+            font-size: 11px;
+            color: #6b7280;
+            font-weight: 700;
+        }
+
+        .topic-title {
+            font-size: 16px;
+            font-weight: 900;
+            color: #111827;
+        }
+
+        .topic-desc {
+            font-size: 13px;
+            color: #374151;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+        .discussion-wrap { display: flex; flex-direction: column; gap: 16px; }
+
+        .discussion-heading { margin: 0 0 12px; color: #111827; font-size: 18px; }
+
+        .discussion-topic-grid {
+            display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px;
+        }
+
+        .discussion-topic-btn {
+            padding: 8px 14px; border: 2px solid #111827; border-radius: 8px;
+            background: #fff; color: #111827; font-weight: 700; cursor: pointer;
+            transition: all 0.15s;
+        }
+        .discussion-topic-btn.is-active {
+            background: #34d399; border-color: #167853;
+        }
+
+        .discussion-new-post { margin-bottom: 16px; }
+
+        .discussion-textarea {
+            width: 100%; min-height: 80px; padding: 10px 12px;
+            border: 2px solid #d1d5db; border-radius: 8px;
+            font: inherit; font-size: 14px; resize: vertical;
+            color: #111827; background: #fff;
+        }
+
+        .discussion-composer-toolbar {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .emoji-control { position: relative; }
+
+        .emoji-toggle-button {
+            padding: 7px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            background: #fff;
+            color: #374151;
+            cursor: pointer;
+        }
+
+        .emoji-picker {
+            position: absolute;
+            left: 0;
+            top: calc(100% + 6px);
+            z-index: 30;
+            display: grid;
+            grid-template-columns: repeat(4, 58px);
+            gap: 8px;
+            width: max-content;
+            max-width: 300px;
+            padding: 10px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            background: #fff;
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .emoji-picker[hidden] { display: none; }
+
+        .emoji-option {
+            width: 58px;
+            height: 58px;
+            padding: 4px;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        .emoji-option:hover {
+            border-color: #34d399;
+            background: #d1fae5;
+        }
+
+        .emoji-option img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .emoji-picker-message {
+            grid-column: 1 / -1;
+            margin: 0;
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        .selected-emoji-preview {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            min-height: 38px;
+        }
+
+        .selected-emoji-preview img {
+            width: 46px;
+            height: 46px;
+            object-fit: contain;
+        }
+
+        .remove-emoji-button {
+            border: 0;
+            background: transparent;
+            color: #ef4444;
+            cursor: pointer;
+        }
+
+        .comment-emoji {
+            display: block;
+            width: 96px;
+            height: 96px;
+            margin: 8px 0;
+            object-fit: contain;
+        }
+
+        .discussion-submit-btn {
+            padding: 8px 16px; border: 0; border-radius: 8px;
+            background: #34d399; color: #102018;
+            font-weight: 800; cursor: pointer;
+        }
+
+        .discussion-post {
+            padding: 14px; border: 2px solid #e5e7eb;
+            border-radius: 8px; background: #fff;
+            margin-bottom: 12px;
+        }
+
+        .post-header { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
+        .post-author { font-weight: 800; color: #111827; font-size: 14px; }
+        .post-time { color: #9ca3af; font-size: 12px; }
+        .post-content { color: #374151; font-size: 14px; line-height: 1.6; margin-bottom: 10px; white-space: pre-wrap;}
+
+        .post-actions { display: flex; gap: 8px; }
+        .post-actions button {
+            padding: 4px 10px; border: 1px solid #e5e7eb;
+            border-radius: 6px; background: #f9fafb;
+            color: #374151; font-size: 12px; cursor: pointer;
+        }
+        .post-like-btn.is-liked { background: #d1fae5; border-color: #34d399; color: #065f46; }
+
+        .discussion-reply {
+            margin-top: 8px; padding: 10px 12px;
+            border-left: 3px solid #34d399;
+            background: #f9fafb; border-radius: 0 6px 6px 0;
+        }
+
+        .discussion-login-hint {
+            padding: 12px; color: #6b7280; font-size: 14px;
+        }
+        .discussion-login-hint a { color: #34d399; font-weight: 700; }
+
+        .discussion-empty { color: #9ca3af; font-size: 14px; padding: 20px 0; text-align: center; }
+        .discussion-loading { color: #9ca3af; font-size: 14px; padding: 20px 0; text-align: center; }
+        /* Toolbar */
+        .nb-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 14px;
+            background: #12122a;
+            border-bottom: 1px solid #2a2a50;
+        }
+        .nb-question {
+            padding: 12px 16px;
+            background: #1a1a2e;
+            border-bottom: 1px solid #2a2a50;
+            color: #a9b1d6;
+            font-size: 13px;
+            line-height: 1.7;
+            white-space: pre-line;
+        }
+        .nb-cell-locked {
+            border-left: 3px solid #e0af68 !important;
+            background: #23233f;
+            opacity: 0.95;
+        }
+        .nb-cell-locked .nb-cell-gutter {
+            background: #17172c;
+        }
+        .nb-cell-locked .nb-editor {
+            background: #23233f;
+        }
+        .nb-locked-badge {
+            position: absolute;
+            top: 4px;
+            right: 8px;
+            font-size: 11px;
+            color: #e0af68;
+            background: rgba(224, 175, 104, 0.12);
+            border: 1px solid rgba(224, 175, 104, 0.4);
+            border-radius: 10px;
+            padding: 1px 8px;
+            letter-spacing: 0.5px;
+        }
+        
+        .nb-locked-badge::before {
+            content: "🔒";
+        }
+        .nb-cell-locked .CodeMirror {
+            background: #000000 !important;
+            cursor: not-allowed !important;
+        }
+        .nb-title { color: #a9b1d6; font-size: 13px; font-weight: 600; }
+        .nb-toolbar-actions { display: flex; gap: 6px; }
+        .nb-btn {
+            padding: 4px 10px;
+            background: #1e1e3f;
+            border: 1px solid #3b3b6d;
+            border-radius: 4px;
+            color: #a9b1d6;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .nb-btn:hover { background: #2a2a5a; }
+
+        /* Cell */
+        .nb-cell {
+            display: flex;
+            align-items: stretch;
+            border-bottom: 1px solid #1a1a35;
+            position: relative;
+            transition: border-left 0.1s;
+            border-left: 3px solid transparent;
+        }
+        .nb-cell.is-active  { border-left-color: #7aa2f7; }
+        .nb-cell.is-running { border-left-color: #e0af68; }
+
+        .nb-cell-gutter {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 4px;
+            min-width: 50px;
+            background: #0d0d1a;
+            gap: 6px;
+        }
+        .nb-run-btn {
+            background: none;
+            border: none;
+            color: #9ece6a;
+            font-size: 15px;
+            cursor: pointer;
+            padding: 0;
+            opacity: 1;
+            line-height: 1;
+        }
+        .nb-run-btn:hover { color: #c3e88d; }
+        .nb-counter { color: #3b4261; font-size: 11px; white-space: nowrap; }
+
+        .nb-cell-body { flex: 1; overflow: hidden; }
+
+        .nb-del-btn {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: none;
+            border: none;
+            color: #3b4261;
+            cursor: pointer;
+            font-size: 12px;
+            color: #f7768e;
+            opacity: 1;
+            transition: opacity 0.15s;
+        }
+        .nb-cell:hover .nb-del-btn { opacity: 1; }
+        .nb-del-btn:hover { color: #f7768e; }
+
+        /* CodeMirror 覆寫 */
+        .nb-editor .CodeMirror {
+            background: #1a1b2e !important;
+            color: #a9b1d6 !important;
+            font-size: 13px;
+            height: auto;
+            min-height: 52px;
+            font-family: 'Fira Code', 'JetBrains Mono', monospace;
+        }
+        .nb-editor .CodeMirror-gutters {
+            background: #12122a !important;
+            border-right: 1px solid #2a2a50 !important;
+        }
+        .nb-editor .CodeMirror-linenumber { color: #3b4261 !important; }
+
+        /* Output */
+        .nb-output {
+            padding: 0;
+            font-size: 12px;
+            white-space: pre-wrap;
+            font-family: 'Fira Code', monospace;
+            margin-left: 50px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .nb-output.is-stdout {
+            padding: 6px 10px;
+            color: #c3e88d;
+            background: #0d1117;
+            border-top: 1px dashed #1a2a1a;
+        }
+        .nb-output.is-error {
+            padding: 6px 10px;
+            color: #f7768e;
+            background: #1a0d0d;
+            border-top: 1px dashed #2a1a1a;
+        }
+        .nb-output-text {
+            white-space: pre-wrap;
+        }
+        .nb-output-image {
+            display: block;
+            max-width: 100%;
+            margin: 8px 0;
+            border-radius: 4px;
+            background: #fff;
+        }
+
+        /* Footer */
+        .nb-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 14px;
+            background: #12122a;
+            border-top: 1px solid #2a2a50;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .nb-kernel-status { font-size: 11px; color: #565f89; }
+        .nb-submit-row { display: flex; align-items: center; gap: 8px; }
+        .nb-player-input {
+            padding: 4px 8px;
+            background: #1e1e3f;
+            border: 1px solid #3b3b6d;
+            border-radius: 4px;
+            color: #a9b1d6;
+            font-size: 12px;
+            width: 120px;
+        }
+        .nb-submit-btn {
+            padding: 5px 14px;
+            background: #7aa2f7;
+            border: none;
+            border-radius: 4px;
+            color: #0d0d1a;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .nb-submit-btn:hover { background: #89b4fa; }
+        .nb-submit-status { font-size: 12px; color: #9ece6a; }
+
+        /* PyBryt 回饋 */
+        .nb-feedback {
+            padding: 12px 16px;
+            background: #0d1117;
+            border-top: 1px solid #2a2a50;
+        }
+        .fb-title { color: #a9b1d6; font-size: 13px; margin: 0 0 8px; }
+        .fb-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; }
+        .fb-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .fb-pass { background: #0d2010; color: #9ece6a; }
+        .fb-fail { background: #2a0d10; color: #f7768e; }
+        .fb-icon { font-weight: 700; }
+        .fb-name { font-weight: 600; }
+        .fb-msg  { opacity: 0.8; }
+
+        .map-track::before {
+            position: absolute;
+            top: 48%;
+            left: 96px;
+            width: calc(100% - 192px);
+            height: 12px;
+            border-radius: 999px;
+            background: repeating-linear-gradient(90deg, #eab308 0 54px, #92400e 54px 78px);
+            box-shadow: 0 8px 0 rgba(0, 0, 0, 0.22);
+            content: "";
+        }
+
+        .level-node {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            width: 190px;
+            min-height: 240px;
+            place-items: center;
+            border: 0;
+            color: #fff7ed;
+            background: transparent;
+            text-align: center;
+            transform: translateY(calc((var(--lift) * -74px) + 30px));
+        }
+
+        .level-island {
+            display: grid;
+            width: 172px;
+            height: 146px;
+            place-items: center;
+            border: 5px solid #3f2a19;
+            border-radius: 42% 58% 52% 48% / 46% 39% 61% 54%;
+            background:
+                linear-gradient(145deg, #5b3a22 0 24%, #8b5e34 25% 45%, #315f3b 46% 100%);
+            box-shadow: 0 14px 0 #1f2937, 0 28px 38px rgba(0, 0, 0, 0.32);
+            transition: transform 0.18s ease, filter 0.18s ease;
+        }
+
+        .level-node:hover .level-island,
+        .level-node.is-selected .level-island {
+            filter: brightness(1.12);
+            transform: translateY(-8px);
+        }
+
+        .level-icon {
+            display: grid;
+            width: 74px;
+            height: 74px;
+            place-items: center;
+            border: 5px solid #78350f;
+            border-radius: 50%;
+            color: #422006;
+            background: #facc15;
+            font-size: 34px;
+            font-weight: 900;
+            box-shadow: inset 0 -9px 0 rgba(146, 64, 14, 0.24);
+        }
+
+        .level-icon img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .level-name {
+            display: block;
+            margin-top: 18px;
+            padding: 10px 14px;
+            border: 3px solid #111827;
+            border-radius: 8px;
+            color: #111827;
+            background: #fef3c7;
+            font-size: 20px;
+            font-weight: 900;
+            box-shadow: 0 6px 0 rgba(0, 0, 0, 0.28);
+        }
+
+        .level-code {
+            display: block;
+            margin-top: 9px;
+            color: #e5e7eb;
+            font-weight: 800;
+            text-shadow: 0 3px 0 rgba(0, 0, 0, 0.36);
+        }
+
+        .detail-panel {
+            display: none;
+            margin: 24px clamp(18px, 5vw, 74px) 0;
+            border: 4px solid #0b1220;
+            border-radius: 8px;
+            background: #f8fafc;
+            color: #111827;
+            box-shadow: 0 18px 0 rgba(0, 0, 0, 0.24);
+        }
+
+        .detail-panel.is-open {
+            display: block;
+        }
+
+        .detail-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 18px;
+            color: #f8fafc;
+            background: #111827;
+        }
+
+        .detail-title h3 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .detail-title span {
+            display: block;
+            margin-top: 6px;
+            color: #cbd5e1;
+        }
+
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 14px 18px;
+            background: #e2e8f0;
+        }
+
+        .tab-button {
+            padding: 11px 16px;
+            color: #1f2937;
+            background: #ffffff;
+            box-shadow: 0 4px 0 #cbd5e1;
+        }
+
+        .tab-button.is-active {
+            color: #102018;
+            background: #34d399;
+            box-shadow: 0 4px 0 #167853;
+        }
+
+        .tab-body {
+            min-height: 480px;
+            padding: 18px;
+        }
+
+        .iframe-wrap {
+            width: 100%;
+            aspect-ratio: 16/9;  
+            height: auto;          
+            min-height: unset;     
+            overflow: hidden;
+            border: 3px solid #111827;
+            border-radius: 8px;
+            background: #000;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: 0;
+            background: #000;
+            display: block;
+        }
+
+        .discussion-grid,
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .paper-card {
+            min-height: 160px;
+            padding: 18px;
+            border: 3px solid #111827;
+            border-radius: 8px;
+            background: #fff7ed;
+            box-shadow: 0 8px 0 #d6b98a;
+        }
+
+        .paper-card h4 {
+            margin: 0 0 10px;
+            font-size: 20px;
+        }
+
+        .paper-card p {
+            margin: 0;
+            color: #374151;
+            line-height: 1.7;
+        }
+
+        .submit-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 220px;
+            gap: 14px;
+            margin-top: 16px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            resize: vertical;
+            padding: 14px;
+            border: 3px solid #111827;
+            border-radius: 8px;
+            color: #d1fae5;
+            background: #0b1020;
+            line-height: 1.5;
+        }
+
+        .submit-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        input {
+            width: 100%;
+            padding: 11px 12px;
+            border: 3px solid #111827;
+            border-radius: 8px;
+        }
+
+        .status {
+            min-height: 44px;
+            color: #166534;
+            font-size: 14px;
+            font-weight: 800;
+            line-height: 1.5;
+        }
+
+        .logout-form {
+            margin: 0;
+        }
+
+        .session-timer {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border: 2px solid #1e3a8a;
+            border-radius: 8px;
+            background: #dbeafe;
+            color: #1e3a8a;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .session-timer b {
+            font-variant-numeric: tabular-nums;
+        }
+
+        .session-timer button {
+            padding: 2px 8px;
+            border: 0;
+            border-radius: 6px;
+            background: #1e3a8a;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .session-timer.is-warning {
+            border-color: #b91c1c;
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .session-timer.is-warning button {
+            background: #b91c1c;
+        }
+
+        .user-name {
+            color: #a7f3d0;
+            font-weight: 800;
+        }
+
+        .point-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            border: 2px solid #92400e;
+            border-radius: 8px;
+            color: #422006;
+            background: #facc15;
+            font-weight: 900;
+            box-shadow: inset 0 -4px 0 rgba(146, 64, 14, 0.22);
+        }
+
+        .shop-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 20;
+            display: grid;
+            place-items: center;
+            padding: 22px;
+            background: rgba(15, 23, 42, 0.72);
+        }
+
+        .shop-modal[hidden] {
+            display: none;
+            top: 78px;
+        }
+
+        .shopModal .shop-panel {
+            max-height: calc(100vh - 78px - 44px);
+        }
+
+        .shop-panel {
+            width: min(780px, 100%);
+            max-height: min(760px, calc(100vh - 44px));
+            overflow: auto;
+            padding: 24px;
+            border: 5px solid #111827;
+            border-radius: 8px;
+            color: #111827;
+            background: #ffffff;
+            box-shadow: 0 24px 0 rgba(0, 0, 0, 0.26);
+        }
+
+        .shop-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        .shop-head h2,
+        .shop-head p {
+            margin: 0;
+        }
+
+        .shop-store-panel {
+            width: min(980px, 100%);
+        }
+
+        .shop-layout {
+            display: grid;
+            grid-template-columns: 180px minmax(0, 1fr);
+            gap: 18px;
+            align-items: start;
+        }
+
+        .shop-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 14px;
+        }
+
+        #shopGrid,
+        #inventoryGrid {
+            grid-template-columns: repeat(auto-fill, 180px);
+            justify-content: start;
+            align-items: start;
+        }
+
+        .inventory-content {
+            min-width: 0;
+        }
+
+        .shop-nav {
+            position: sticky;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 12px;
+            border: 3px solid #111827;
+            border-radius: 8px;
+            background: #e5e7eb;
+        }
+
+        .shop-nav-title {
+            margin: 0 0 4px;
+            color: #374151;
+            font-size: 14px;
+            font-weight: 900;
+        }
+
+        .shop-category-button {
+            width: 100%;
+            border: 2px solid #111827;
+            border-radius: 8px;
+            padding: 10px 12px;
+            color: #111827;
+            background: #ffffff;
+            font-weight: 800;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .shop-category-button.is-active {
+            color: #102018;
+            background: #34d399;
+            box-shadow: inset 0 -4px 0 rgba(16, 32, 24, 0.18);
+        }
+
+        .shop-item {
+            padding: 16px;
+            border: 3px solid #111827;
+            border-radius: 8px;
+            background: #f8fafc;
+        }
+
+        .shop-item-image {
+            display: block;
+            width: 100%;
+            aspect-ratio: 4 / 3;
+            margin-bottom: 12px;
+            border: 2px solid #111827;
+            border-radius: 8px;
+            object-fit: cover;
+            background: #e5e7eb;
+        }
+
+        .shop-item[hidden],
+        .shop-empty[hidden] {
+            display: none;
+        }
+
+        .shop-category-label {
+            display: inline-block;
+            margin-bottom: 8px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            color: #374151;
+            background: #e5e7eb;
+            font-size: 12px;
+            font-weight: 900;
+        }
+
+        .shop-empty {
+            margin: 0;
+            padding: 18px;
+            border: 3px dashed #cbd5e1;
+            border-radius: 8px;
+            color: #64748b;
+            background: #f8fafc;
+            font-weight: 800;
+        }
+        .shop-item strong {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .shop-item button {
+            margin-top: 10px;
+            border: 0;
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: #102018;
+            background: #34d399;
+            font-weight: 800;
+        }
+
+        .shop-item button:disabled {
+            color: #64748b;
+            background: #cbd5e1;
+            cursor: not-allowed;
+        }
+
+        .unlock-toast {
+            position: fixed;
+            top: 90px;
+            right: 22px;
+            z-index: 30;
+            max-width: 320px;
+            padding: 16px 18px;
+            border: 3px solid #111827;
+            border-radius: 8px;
+            color: #102018;
+            background: #34d399;
+            box-shadow: 0 12px 0 #167853, 0 18px 38px rgba(0, 0, 0, 0.32);
+            font-weight: 800;
+            animation: unlock-toast-in 0.25s ease-out;
+        }
+
+        .unlock-toast p {
+            margin: 6px 0 0;
+            font-weight: 700;
+        }
+
+        .unlock-toast.is-closed {
+            color: #fff;
+            background: #ef4444;
+            box-shadow: 0 12px 0 #991b1b, 0 18px 38px rgba(0, 0, 0, 0.32);
+        }
+
+        @keyframes unlock-toast-in {
+            from { transform: translateY(-12px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @media (max-width: 880px) {
+            .topbar,
+            .map-head,
+            .detail-head {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .map-window {
+                min-height: 500px;
+                padding-inline: 34px;
+            }
+
+            .map-track {
+                gap: 80px;
+                min-width: 980px;
+            }
+
+            .discussion-grid,
+            .stats-grid,
+            .submit-grid,
+            .shop-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .shop-nav {
+                position: static;
+                order: -1;
+                flex-direction: row;
+                overflow-x: auto;
+            }
+
+            .shop-category-button {
+                min-width: 104px;
+                text-align: center;
+            }
+        }
+
+        /* ===== AI 小助手樣式（從個人版移植）===== */
+                /* AI 小助手按鈕 */
+        .ai-avatar-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            border: 0;
+            border-radius: 50%;
+            background: #3b82f6;
+            box-shadow: 0 8px 0 #1d4ed8, 0 14px 28px rgba(0, 0, 0, 0.32);
+            cursor: pointer;
+            transition: transform 0.15s;
+        }
+        .ai-avatar-btn:hover {
+            transform: translateY(-2px);
+            background: #60a5fa;
+        }
+        .ai-avatar-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 4px 0 #1d4ed8, 0 8px 16px rgba(0, 0, 0, 0.32);
+        }
+        .ai-avatar-icon {
+            font-size: 22px;
+        }
+
+        /* 浮動聊天視窗 */
+        .ai-float-panel {
+            position: fixed;
+            top: 100px;
+            right: 24px;
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            width: 340px;
+            height: 440px;
+            min-width: 260px;
+            min-height: 280px;
+            max-width: 90vw;
+            max-height: 80vh;
+            border: 4px solid #0b1220;
+            border-radius: 10px;
+            background: #0f172a;
+            box-shadow: 0 18px 0 rgba(0, 0, 0, 0.24), 0 24px 48px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+        }
+        .ai-float-panel[hidden] {
+            display: none;
+        }
+
+        .ai-float-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            background: #111827;
+            color: #f8fafc;
+            font-weight: 800;
+            cursor: move;
+            user-select: none;
+            flex-shrink: 0;
+        }
+        .ai-float-title {
+            font-size: 14px;
+        }
+        #aiFloatContext {
+            margin-left: 6px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: #34d399;
+            color: #102018;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .ai-float-close {
+            border: 0;
+            background: transparent;
+            color: #f8fafc;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .ai-float-close:hover {
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .ai-float-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: #0b1120;
+        }
+        .ai-float-msg {
+            max-width: 85%;
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 13px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .ai-float-msg-user {
+            align-self: flex-end;
+            background: #34d399;
+            color: #102018;
+            font-weight: 700;
+            border-bottom-right-radius: 2px;
+        }
+        .ai-float-msg-bot {
+            align-self: flex-start;
+            background: #1e293b;
+            color: #e2e8f0;
+            border-bottom-left-radius: 2px;
+        }
+        .ai-float-msg-loading {
+            align-self: flex-start;
+            color: #64748b;
+            font-size: 12px;
+            font-style: italic;
+        }
+
+        .ai-float-input-row {
+            display: flex;
+            gap: 8px;
+            padding: 10px;
+            background: #111827;
+            align-items: flex-end;
+            flex-shrink: 0;
+        }
+        .ai-float-input {
+            flex: 1 1 auto;
+            resize: none;
+            padding: 6px 10px;
+            border: 2px solid #334155;
+            border-radius: 6px;
+            background: #0f172a;
+            color: #f8fafc;
+            font: inherit;
+            font-size: 13px;
+            line-height: 20px;
+            height: 32px;
+            min-height: 32px;
+            max-height: 80px;
+            box-sizing: border-box;
+            overflow-x: hidden;
+            overflow-y: hidden;
+        }
+        .ai-float-input::-webkit-scrollbar {
+            width: 4px;
+        }
+        .ai-float-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        .ai-float-send {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            border: 0;
+            border-radius: 6px;
+            padding: 0 16px;
+            background: #3b82f6;
+            color: #fff;
+            font-weight: 800;
+            font-size: 13px;
+            height: 32px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .ai-float-send:hover {
+            background: #60a5fa;
+        }
+        .ai-float-send:disabled {
+            background: #475569;
+            cursor: not-allowed;
+        }
+
+        .ai-float-resize {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            width: 18px;
+            height: 18px;
+            cursor: nwse-resize;
+            background: linear-gradient(135deg, transparent 50%, #334155 50%);
+        }
+
+        /* ===== 設定選單 ===== */
+        .settings-body {
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+        }
+
+        .settings-section-title {
+            margin: 0 0 12px;
+            font-size: 16px;
+            color: #111827;
+        }
+
+        .settings-hint {
+            margin: 8px 0 0;
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .settings-volume-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .settings-slider {
+            flex: 1;
+            height: 6px;
+            border-radius: 999px;
+            background: #d1d5db;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        .settings-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #34d399;
+            cursor: pointer;
+            box-shadow: 0 2px 0 #167853;
+        }
+        .settings-volume-value {
+            min-width: 42px;
+            text-align: right;
+            font-weight: 800;
+            color: #111827;
+        }
+
+        .settings-option-btn {
+            display: block;
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #111827;
+            border-radius: 8px;
+            background: #f9f9fa;
+            color: #000000;
+            font-weight: 800;
+            cursor: pointer;
+            margin-bottom: 4px;
+            text-decoration: none;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        .settings-option-btn:hover {
+            background: #767f8b;
+        }
+
+        .settings-chapter-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 240px;
+            overflow-y: auto;
+        }
+        .settings-loading {
+            color: #9ca3af;
+            font-size: 13px;
+            text-align: center;
+            padding: 12px 0;
+        }
+
+        .settings-chapter-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            background: #fff7ed;
+            color: #111827;
+            text-decoration: none;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.15s;
+        }
+        .settings-chapter-link:hover {
+            transform: translateX(4px);
+            background: #fef3c7;
+        }
+        .settings-chapter-link .settings-chapter-code {
+            font-size: 12px;
+            color: #6b7280;
+            font-weight: 600;
+        }
+        .settings-chapter-link.is-locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .settings-chapter-link.is-locked:hover {
+            transform: none;
+            background: #fff7ed;
+        }
+                /* 新手導覽 */
+
+        /*全黑視窗*/
+        .onboarding-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(0, 0, 0, 0.68);
+        }
+        /*高亮*/
+        .onboarding-highlight {
+            position: relative;
+            z-index: 10000;
+            outline: 5px solid #facc15;
+            outline-offset: 6px;
+            box-shadow: 0 0 32px rgba(250, 204, 21, 1);
+        }
+
+        /*教學對話欄*/
+        .onboarding-box {
+            position: fixed;
+            z-index: 10001;
+            width: min(340px, calc(100vw - 32px));
+            padding: 18px;
+            border: 4px solid #0b1220;
+            border-radius: 8px;
+            background: #f8fafc;
+            color: #111827;
+            box-shadow: 0 14px 0 rgba(0, 0, 0, 0.25);
+        }
+
+        .onboarding-box h3 {
+            margin: 0 0 8px;
+            font-size: 22px;
+        }
+
+        .onboarding-box p {
+            margin: 0;
+            line-height: 1.6;
+        }
+        /*教學按鈕*/
+        .onboarding-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 14px;
+        }
+
+        .onboarding-actions button {
+            border: 0;
+            border-radius: 8px;
+            padding: 9px 13px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+        /*跳過按鈕*/
+        #skiponboarding {
+            background: #e5e7eb;
+            color: #111827;
+        }
+        /*下一步按鈕*/
+        #nextonboarding {
+            background: #34d399;
+            color: #102018;
+        }
+        .onboarding-parent {
+            z-index: 10000;
+        }
+        .instruction_container {
+            width: 100%;
+            margin: 32px auto 0;
+            border: 4px solid #0b1220;
+            border-radius: 8px;
+            overflow: visible;
+            background: #dff4ff;
+            color: #111827;
+            box-shadow: 0 12px 0 rgba(0, 0, 0, 0.18);
+        }
+        
+        .instruction_header {
+            position: sticky;
+            top: 78px;
+            z-index: 4;
+            border-bottom: 4px solid #0f4c81;
+            background: #dff4ff;
+        }
+        
+        .instruction_menu {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px 34px;
+            margin: 0;
+            padding: 14px 18px;
+            list-style: none;
+        }
+        
+        .instruction_menu button {
+            border: 0;
+            border-radius: 8px;
+            padding: 12px 18px;
+            background: transparent;
+            color: #0b1220;
+            font-weight: 900;
+            cursor: pointer;
+        }
+        
+        .instruction_menu button:hover {
+            background: #0f4c81;
+            color: white;
+        }
+
+        .instruction_menu button.is-active {
+            background: #0f4c81;
+            color: white;
+        }
+        
+        .instruction_dropdown {
+            position: relative;
+        }
+        
+        .instruction_dropdown_menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 50%;
+            z-index: 30;
+            display: none;
+            width: 190px;
+            margin: 0;
+            padding: 10px;
+            border: 2px solid #0b1220;
+            border-radius: 8px;
+            background: #e0f2fe;
+            box-shadow: 0 10px 22px rgba(15, 23, 42, 0.22);
+            list-style: none;
+            transform: translateX(-50%);
+        }
+        
+        .instruction_dropdown.is_open .instruction_dropdown_menu {
+            display: grid;
+            gap: 8px;
+        }
+        
+        .instruction_dropdown_menu button {
+            width: 100%;
+            text-align: left;
+        }
+        
+        .instruction_section {
+            padding: 44px 56px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.22);
+        }
+        
+        .instruction_section h2 {
+            margin: 0 0 24px;
+            font-size: 36px;
+        }
+        
+        .instruction_section p {
+            margin: 0 auto;
+            max-width: 760px;
+            font-size: 22px;
+            line-height: 1.8;
+        }
+
+        .announcement-list {
+            display: grid;
+            gap: 18px;
+            width: min(760px, 100%);
+            margin: 0 auto;
+            text-align: left;
+        }
+
+        .announcement-item {
+            padding: 20px 22px;
+            border: 3px solid #0f4c81;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.72);
+            box-shadow: 0 6px 0 rgba(15, 76, 129, 0.18);
+        }
+
+        .announcement-item h3 {
+            margin: 0 0 10px;
+            font-size: 22px;
+        }
+
+        .announcement-item p {
+            max-width: none;
+            margin: 0 0 12px;
+            font-size: 18px;
+            line-height: 1.7;
+        }
+
+        .announcement-item time {
+            color: #475569;
+            font-size: 14px;
+            font-weight: 700;
+        }
+        .topbar-avatar-link {
+            display: inline-flex;
+        }
+        .topbar-avatar-img {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #34d399;
+        }
+        .post-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 4px;
+        }
+        .post-avatar-small {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 4px;
+        }
+        .profile-banner {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            flex: 0 0 240px;
+            width: 240px;
+            height: 54px;
+            padding: 8px 12px;
+            overflow: hidden;
+            border-radius: 10px;
+            background: linear-gradient(110deg, #134e5e, #1f2937);
+            color: white;
+            text-decoration: none;
+        }
+        .profile-banner-image {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .profile-banner::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, rgba(0, 0, 0, .55), transparent);
+        }
+        .profile-banner .topbar-avatar-img,
+        .profile-banner .user-name {
+            position: relative;
+            z-index: 1;
+        }
+        /* 每日任務按鈕 */
+        .dayGoal-menu summary {
+            cursor: pointer;
+            list-style: none;
+            white-space: nowrap;
+        }
+
+        /* 隱藏瀏覽器原本的箭頭 */
+        .dayGoal-menu summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .dayGoal-down {
+            display: inline-block;
+            margin-left: 6px;
+        }
+
+        /* 展開時讓箭頭轉向 */
+        .dayGoal-menu[open] .dayGoal-down {
+            transform: rotate(180deg);
+        }
+
+        /* 下拉面板 */
+        .dayGoal-control {
+            position: fixed;
+            z-index: 6;
+            width: min(340px, calc(100vw - 24px));
+            padding: 18px;
+            overflow-y: auto;
+            border: 1px solid #475569;
+            border-radius: 14px;
+            color: #f8fafc;
+            background: #152235;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .dayGoal-note {
+            margin: 10px 0;
+            color: #94a3b8;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        /* 每一張任務卡 */
+        .dayGoal-goal {
+            margin-top: 12px;
+            padding: 14px;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            background: #1e293b;
+        }
+
+        /* 任務名稱與點數分別放在左右 */
+        .dayGoal-goal-hidden,
+        .dayGoal-task-state {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .dayGoal-goal-hidden {
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .dayGoal-point {
+            color: #facc15;
+            white-space: nowrap;
+        }
+
+        .dayGoal-task-state {
+            margin: 12px 0 6px;
+            color: #cbd5e1;
+            font-size: 12px;
+        }
+
+        /* 進度條 */
+        .dayGoal-progress {
+            display: block;
+            width: 100%;
+            height: 8px;
+            border: 0;
+            border-radius: 99px;
+            overflow: hidden;
+            appearance: none;
+            background: #0b1626;
+        }
+
+        .dayGoal-progress::-webkit-progress-bar {
+            background: #0b1626;
+        }
+
+        .dayGoal-progress::-webkit-progress-value {
+            background: #facc15;
+            border-radius: 99px;
+        }
+
+        .dayGoal-progress::-moz-progress-bar {
+            background: #facc15;
+            border-radius: 99px;
+        }
+
+        /* 已完成的任務變成綠色 */
+        .dayGoal-goal.is-complete {
+            border-color: #347662;
+            background: #16352f;
+        }
+
+        .dayGoal-goal.is-complete .dayGoal-count {
+            color: #6ee7b7;
+        }
+
+        .dayGoal-goal.is-complete .dayGoal-progress::-webkit-progress-value {
+            background: #34d399;
+        }
+
+        .dayGoal-goal.is-complete .dayGoal-progress::-moz-progress-bar {
+            background: #34d399;
+        }
+        /* AI 頭像與訊息並排 */
+        .ai-float-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            width: 100%;
+            flex-shrink: 0;
+        }
+
+        .ai-float-avatar {
+            width: 36px;
+            height: 36px;
+            flex-shrink: 0;
+            border-radius: 50%;
+            object-fit: contain;
+            background: #1e293b;
+            border: 1px solid #475569;
+        }
+
+        .ai-float-row .ai-float-msg {
+            min-width: 0;
+            max-width: calc(100% - 44px);
+        }
+
+        .ai-float-row-user {
+            justify-content: flex-end;
+        }
+
+        .ai-float-row-user .ai-float-msg {
+            max-width: 85%;
+        }
+    </style>
+</head>
+<body>
+    {% if background_music_enabled %}
+        <audio id="bgMusic" src="{% static 'pages/audio/BGM.mp3' %}" loop preload="auto"></audio>
+    {% endif %}
+    <div class="shell">
+        <header class="topbar">
+            <div class="top-actions">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'profile_page' %}" class="profile-banner" title="前往個人頁面">
+                        {% if background_url %}
+                            <img class="profile-banner-image" src="{{ background_url }}" alt="">
+                        {% endif %}
+                        <img src="{{ user_avatar_url }}" alt="頭像" class="topbar-avatar-img">
+                        <span class="user-name">{{ user.username }}</span>
+                    </a>
+                    <span class="point-badge" id="pointBadge">點數 {{ user_points }}</span>
+                    <span class="session-timer" id="sessionTimer" title="閒置超過這個時間會自動登出">
+                        登入剩餘 <b id="sessionTimerText">--:--</b>
+                        <button type="button" id="sessionResetBtn">重新計時</button>
+                    </span>
+                    <details class ="dayGoal-menu" id = "dayGoalMenu"  data-completed = "{{day_complete}}">
+                        <summary class="point-badge">
+                            <span id="dayGoal">每日任務{{day_complete}}/3題</span>
+                            <span class ="dayGoal-down" aria-hidden="true">▾</span>
+                        </summary>
+                    <div class="dayGoal-control" id="dayGoalControl">
+                        <strong>每日任務</strong>
+                        <p class ="dayGoal-note">通過不同且不重複的題目即可完成任務獲得點數</p>
+                        {% for target, points in day_goal_point.items %}
+                        <div class="dayGoal-goal" data-target="{{target}}">
+                            <div class="dayGoal-goal-hidden">
+                                <span>完成{{target}}個題目</span>
+                                <span class="dayGoal-point">+{{points}}點</span>
+                            </div>
+                            <div class="dayGoal-task-state">
+                                <span class="dayGoal-count">0/{{target}}題</span>
+                                <span class="dayGoal-percent">0%</span>
+                            </div>
+                            <progress class="dayGoal-progress" max="100" value="0" aria-label="完成{{target}}個題目的進度"></progress>
+                        </div>
+                        {% endfor %}
+                        <p class="dayGoal-note">同一題一天只計算一次</p>
+                    </div>
+
+                    </details>
+                    {% if shop_enabled %}
+                        <button class="nav-pill" type="button" id="openShopButton">商店</button>
+                    {% endif %}
+                    <button class="nav-pill" type="button" id="openInventoryButton">物品欄</button>
+                    
+                    {% if is_teacher %}
+                        <a class="nav-pill" href="{% url 'teacher_files' %}">導師介面</a>
+                    {% endif %}
+                    <form class="logout-form" action="{% url 'logout' %}" method="post">
+                        {% csrf_token %}
+                        <button class="nav-pill" type="submit">登出</button>
+                    </form>
+                {% else %}
+                    <a class="nav-pill" href="{% url 'login' %}">登入</a>
+                {% endif %}
+                <button class="ai-button" type="button" id="openAiFromSettings">AI 小助手</button>
+                <button class="nav-pill" type="button" id="openSettingsButton">⚙ 設定</button>
+            </div>
+        </header>
+
+        <section class="start-screen" id="startScreen">
+            <div class="start-card">
+                <div class="title-frame">
+                    <h1>pybryt</h1>
+                </div>
+                <button class="primary-button" id="startButton">開始遊戲</button>
+                                <div class="instruction_container">
+                    <div class="instruction_header">
+                        <ul class="instruction_menu">
+                            <li>
+                                <button id="instructionButton" class="is-active" type="button" data-instruction-target="instruction" onclick="showInstruction('instruction')">專題介紹</button>
+                            </li>
+                            <li>
+                                <button type="button" data-instruction-target="announcements" onclick="showInstruction('announcements')">公告</button>
+                            </li>
+                            <li class="instruction_dropdown" id="instructionDropdown">
+                                <button type="button" class="instruction_dropdown_toggle" onclick="toggleInstructionMenu()">主要功能</button>
+                                <ul class="instruction_dropdown_menu">
+                                    <li>
+                                        <button type="button" data-instruction-target="selfLearning" onclick="showInstruction('selfLearning'); closeInstructionMenu();">自我學習</button>
+                                    </li>
+                                    <li>
+                                        <button type="button" data-instruction-target="gamifiedLearning" onclick="showInstruction('gamifiedLearning'); closeInstructionMenu();">遊戲化學習</button>
+                                    </li>
+                                    <li>
+                                        <button type="button" data-instruction-target="aiHelper" onclick="showInstruction('aiHelper'); closeInstructionMenu();">AI小助手</button>
+                                    </li>
+                                    <li>
+                                        <button type="button" data-instruction-target="shopInventory" onclick="showInstruction('shopInventory'); closeInstructionMenu();">{% if shop_enabled %}商店與物品欄{% else %}物品欄{% endif %}</button>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div id="instruction" class="instruction_section">
+                        <h2>Code Quest</h2>
+                        <p>
+                             此專題致力於開發一個以 Python 程式學習為核心的系統，透過關卡、題目、討論區與 AI 小助手，讓使用者循序漸進地學習。
+                        </p>
+                    </div>
+
+                    <div id="announcements" class="instruction_section" hidden>
+                        <h2>最新公告</h2>
+                        {% if announcements %}
+                            <div class="announcement-list">
+                                {% for announcement in announcements %}
+                                    <article class="announcement-item">
+                                        <h3>{{ announcement.title }}</h3>
+                                        <p>{{ announcement.content|linebreaksbr }}</p>
+                                        <time datetime="{{ announcement.created_at|date:'c' }}">
+                                            {{ announcement.created_at|date:"Y/m/d H:i" }}
+                                        </time>
+                                    </article>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p>目前沒有公告。</p>
+                        {% endif %}
+                    </div>
+                     <div id="selfLearning" class="instruction_section" hidden>
+                        <h2>自我學習</h2>
+                        <p>使用者可以選擇不同關卡，依照自己的進度練習 Python 題目。</p>
+                    </div>
+                
+                    <div id="gamifiedLearning" class="instruction_section" hidden>
+                        <h2>遊戲化學習</h2>
+                        <p>完成關卡可以獲得點數，讓學習過程更有目標感與成就感。</p>
+                    </div>
+                
+                    <div id="aiHelper" class="instruction_section" hidden>
+                        <h2>AI 小助手</h2>
+                        <p>卡關時可以詢問 AI 小助手，協助理解題目與程式邏輯。</p>
+                    </div>
+                
+                    <div id="shopInventory" class="instruction_section" hidden>
+                        <h2>{% if shop_enabled %}商店與物品欄{% else %}物品欄{% endif %}</h2>
+                        {% if shop_enabled %}
+                            <p>使用者可以用點數購買外觀或道具，並在物品欄查看已擁有的物品。</p>
+                        {% else %}
+                            <p>使用者可以在物品欄查看已經擁有的外觀或道具。</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <main class="map-screen" id="mapScreen">
+            <div class="map-head">
+                <div>
+                    <h2>章節</h2>
+                </div>
+                <button class="secondary-button" id="backButton">返回首頁</button>
+            </div>
+
+            <section class="map-window" aria-label="橫向地圖">
+                <div class="map-track">
+                    {% for level in levels %}
+                        <button class="level-node {% if not level.unlocked %}is-locked{% endif %}"
+                                data-level="{{ level.id }}"
+                                data-index="{{ forloop.counter }}"
+                                data-unlocked="{{ level.unlocked|yesno:'true,false' }}"
+                                data-unlock-cost="{{ level.unlock_cost|default_if_none:'' }}"
+                                data-unlock-test-level="{{ level.unlock_test_level|default_if_none:'' }}"
+                                data-unlock-prev-chapter-gate="{{ level.unlock_prev_chapter_gate|yesno:'true,false' }}"
+                                style="--lift: {{ forloop.counter0|divisibleby:2|yesno:'0,1' }};">
+                            <span class="level-island">
+                                <span class="level-icon">
+                                    {% if not level.unlocked %}
+                                        🔒
+                                    {% elif level.story_only %}
+                                        📖
+                                    {% else %}
+                                        <img src="{% static 'pages/images/level-icon.png' %}" alt="" aria-hidden="true">
+                                    {% endif %}
+                                </span>
+                            </span>
+                            <span class="level-name">{{ level.title }}</span>
+                            <span class="level-code">{{ level.chapter }} · {{ level.level }}</span>
+                        </button>
+                    {% endfor %}
+                </div>
+            </section>
+            
+            <section class="detail-panel" id="detailPanel">
+                <div class="detail-head">
+                    <div class="detail-title">
+                        <h3 id="levelTitle">選擇關卡</h3>
+                        <span id="levelMeta"></span>
+                    </div>
+                    <button class="secondary-button" id="closePanel">關閉關卡</button>
+                </div>
+            
+                <div class="tabs">
+                    <button class="tab-button is-active" data-tab="story">劇情</button>
+                    <button class="tab-button" data-tab="topic">題目</button>
+                    <button class="tab-button" data-tab="game">遊戲</button>
+                    <button class="tab-button" data-tab="discussion">討論區</button>
+                    <button class="tab-button" data-tab="stats">關卡統計</button>
+                </div>
+
+                <div class="tab-body" id="tabBody"></div>
+                <div class="tab-body" id="storyHost" hidden>
+                    <div style="position:relative;">
+                        <button id="storyFullscreenBtn" style="
+                            position:absolute; top:8px; right:8px; z-index:10;
+                            padding:6px 12px; border:none; border-radius:6px;
+                            background:rgba(0,0,0,0.6); color:#fff;
+                            font-size:12px; cursor:pointer;">⤢全螢幕</button>
+                        <div class="iframe-wrap" id="iframeWrap"></div>
+                    </div>
+                </div>                
+            </section>
+        </main>
+    </div>
+    <!-- 題目導覽視窗（獨立於設定視窗） -->
+    <div class="shop-modal" id="topicNavModal" hidden>
+        <section class="shop-panel" role="dialog" aria-modal="true" aria-labelledby="topicNavTitle">
+            <div class="shop-head">
+                <div>
+                    <h2 id="topicNavTitle">前往題目</h2>
+                </div>
+                <button class="secondary-button" type="button" id="closeTopicNavButton">關閉</button>
+            </div>
+
+            <div class="settings-body">
+                <div class="settings-chapter-list" id="topicNavList">
+                    <p class="settings-loading">載入解鎖狀態中...</p>
+                </div>
+            </div>
+        </section>
+    </div>
+    <!-- AI 小助手浮動視窗 -->
+    <div class="ai-float-panel" id="aiFloatPanel" hidden>
+        <div class="ai-float-header" id="aiFloatHeader">
+            <span class="ai-float-title">AI 小助手<span id="aiFloatContext"></span></span>
+            <button class="ai-float-close" type="button" id="aiFloatClose">✕</button>
+        </div>
+        <div class="ai-float-body" id="aiFloatBody"
+             data-ai-avatar-url="{{ ai_avatar_url }}">
+            <div class="ai-float-row ai-float-row-bot">
+                <img class="ai-float-avatar" src="{{ ai_avatar_url }}" alt="AI 頭像">
+                <div class="ai-float-msg ai-float-msg-bot">嗨！我是 AI 小助手，有任何 Python 問題都可以問我喔！<br>每日有 {{ ai_chat_free_daily_limit }} 次免費對話機會，超過後每次會扣除 5 點點數。<br>你今天剩餘免費次數：{{ ai_chat_remaining_free }}，目前點數：{{ user_points }}。</div>
+            </div>
+        </div>
+        <div class="ai-float-input-row">
+            <textarea class="ai-float-input" id="aiFloatInput" placeholder="輸入你的問題..."></textarea>
+            <button class="ai-float-send" type="button" id="aiFloatSend">送出</button>
+        </div>
+        <div class="ai-float-resize" id="aiFloatResize"></div>
+    </div>
+
+    {% if shop_enabled %}
+    <!-- 商店 -->
+    <div class="shop-modal" id="shopModal" hidden>
+        <section class="shop-panel shop-store-panel" role="dialog" aria-modal="true" aria-labelledby="shopTitle">
+            <div class="shop-head">
+                <div>
+                    <h2 id="shopTitle">商店</h2>
+                    {% if user.is_authenticated and profile %}
+                        <p>目前餘額：<span id="userPoints">{{ profile.points }}</span></p>
+                    {% endif %}
+                </div>
+                <button class="secondary-button" type="button" id="closeShopButton">關閉</button>
+            </div>
+            <div class="shop-layout">
+                <nav class="shop-nav" aria-label="商店分類">
+                    <p class="shop-nav-title">分類</p>
+                    <button class="shop-category-button is-active" type="button" data-category="all">全部</button>
+                    {% for category_key, category_label in shop_categories %}
+                        <button class="shop-category-button" type="button" data-category="{{ category_key }}">{{ category_label }}</button>
+                    {% endfor %}
+                </nav>
+                <div>
+                    <div class="shop-grid" id="shopGrid">
+                        {% for item in shop_items %}
+                            <div class="shop-item" data-category="{{ item.category }}" data-item-id="{{ item.id }}">
+                                {% if item.image %}
+                                    <img class="shop-item-image" src="{% static item.image %}" alt="{{ item.name }}">
+                                {% endif %}
+                                <span class="shop-category-label">{{ item.get_category_display }}</span>
+                                <strong>{{ item.name }}</strong>
+                                <p>{{ item.description }}</p>
+                                <div>{{ item.price }} point</div>
+
+                                {% if item.id in owned_item_ids %}
+                                    <button type="button" disabled>已購買</button>
+                                {% else %}
+                                    <button type="button" class="buy-item" data-item-id="{{ item.id }}">購買</button>
+                                {% endif %}
+                            </div>
+                        {% empty %}
+                            <p class="shop-empty">目前沒有商品</p>
+                        {% endfor %}
+                    </div>
+                    <p class="shop-empty" id="shopCategoryEmpty" hidden>這個分類目前沒有商品</p>
+                </div>
+            </div>
+        </section>
+    </div>
+    {% endif %}
+
+
+    <!-- 物品欄 -->
+    <div class="shop-modal" id="inventoryModal" hidden>
+        <section class="shop-panel shop-store-panel" role="dialog" aria-modal="true" aria-labelledby="inventoryTitle">
+            <div class="shop-head">
+                <div>
+                    <h2 id="inventoryTitle">物品欄</h2>
+                    <p>已購買的物品會顯示在這裡</p>
+                </div>
+                <button class="secondary-button" type="button" id="closeInventoryButton">關閉</button>
+            </div>
+            <div class="shop-layout">
+                <nav class="shop-nav" aria-label="物品欄分類">
+                    <p class="shop-nav-title">分類</p>
+                    <button class="shop-category-button inventory-category-button is-active" type="button" data-category="all">全部</button>
+                    {% for category_key, category_label in shop_categories %}
+                        <button class="shop-category-button inventory-category-button" type="button" data-category="{{ category_key }}">{{ category_label }}</button>
+                    {% endfor %}
+                </nav>
+                <div class="inventory-content">
+                    <div class="shop-grid" id="inventoryGrid">
+                        {% for user_item in owned_items %}
+                            <div class="shop-item inventory-owned-item" data-category="{{ user_item.item.category }}" data-item-id="{{ user_item.item.id }}">
+                                {% if user_item.item.image %}
+                                    <img class="shop-item-image" src="{% static user_item.item.image %}" alt="{{ user_item.item.name }}">
+                                {% endif %}
+                                <span class="shop-category-label">{{ user_item.item.get_category_display }}</span>
+                                <strong>{{ user_item.item.name }}</strong>
+                                <p>{{ user_item.item.description }}</p>
+                                <div class="inventory-meta">已擁有</div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <p class="shop-empty" id="inventoryEmpty" {% if owned_items %}hidden{% endif %}>目前沒有物品</p>
+                    <p class="shop-empty" id="inventoryCategoryEmpty" hidden>這個分類目前沒有物品</p>
+                </div>
+            </div>
+        </section>
+    </div>
+    <!-- 解鎖選項 -->
+    <div class="shop-modal" id="unlockModal" hidden>
+        <section class="shop-panel" role="dialog" aria-modal="true" aria-labelledby="unlockModalTitle">
+            <div class="shop-head">
+                <div>
+                    <h2 id="unlockModalTitle">關卡尚未解鎖</h2>
+                    <p id="unlockModalSubtitle">符合以下任一條件即可解鎖：</p>
+                </div>
+                <button class="secondary-button" type="button" id="closeUnlockModal">關閉</button>
+            </div>
+            <div class="shop-grid" id="unlockOptions"></div>
+        </section>
+    </div>
+
+    <!-- 設定 -->
+    <div class="shop-modal" id="settingsModal" hidden>
+        <section class="shop-panel" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+            <div class="shop-head">
+                <div>
+                    <h2 id="settingsTitle">設定</h2>
+                </div>
+                <button class="secondary-button" type="button" id="closeSettingsButton">關閉</button>
+            </div>
+
+            <div class="settings-body">
+                {% if background_music_enabled %}
+                <div class="settings-section">
+                    <h3 class="settings-section-title">🔊 網站音樂音量</h3>
+                    <div class="settings-volume-row">
+                        <span>🔈</span>
+                        <input type="range" id="volumeSlider" min="0" max="100" value="50" class="settings-slider">
+                        <span>🔊</span>
+                        <span class="settings-volume-value" id="volumeValue">50%</span>
+                    </div>
+                    <p class="settings-hint">此音量僅控制網站背景音樂，不影響劇情內的聲音</p>
+                </div>
+                {% endif %}
+                
+                <div class="settings-section">
+                    <a class="settings-option-btn" href="{% url 'profile_page' %}">前往個人頁面</a>
+                    <a class="settings-option-btn" href="{% url 'submissions' %}">我的記錄</a>
+                    <a class="settings-option-btn" href="{% url 'ai_chat' %}">AI問答區 </a>
+                    {% if user.is_staff %}
+                        <a class="settings-option-btn" href="{% url 'admin:index' %}">管理</a>
+                    {% endif %}
+                    <button class="settings-option-btn" type="button" id="goToTopicListBtn">前往題目</button>
+                </div>
+
+            </div>
+        </section>
+    </div>
+    <!---新手導覽-->
+    {% if show_onboarding %}
+    <div class="onboarding-overlay" id="onboardingOverlay"></div>
+    <div class="onboarding-box" id="onboardingBox">
+        <h3 id ="onboardingTitle">歡迎來到Code Quest!</h3>
+        <p id="onboardingText">先點擊開始遊戲按鈕來進入你的第一個程式關卡</p>
+        <div class="onboarding-actions">
+            <button type="button" id="skiponboarding">跳過</button>
+            <button type="button" id="nextonboarding">下一步</button>
+        </div>
+    </div>
+    {% endif %}
+
+    <script>
+        const levels = {{ levels_json|safe }};
+        const levelIconUrl = "{% static 'pages/images/level-icon.png' %}";
+        let selectedLevel = "chapter-1-level-1";
+        let selectedTab = "story";
+        let selectedTopic = null;
+        let currentDiscussionId = null;
+        let storyIframe = null;
+
+        const startScreen = document.querySelector("#startScreen");
+        const mapScreen = document.querySelector("#mapScreen");
+        const detailPanel = document.querySelector("#detailPanel");
+        const levelTitle = document.querySelector("#levelTitle");
+        const levelMeta = document.querySelector("#levelMeta");
+        const tabBody = document.querySelector("#tabBody");
+        const storyHost = document.querySelector("#storyHost");
+        
+        let pyodide = null;
+        let pyodideReady = false;
+        let nbCells = new Map();   // cellId → { editor, outputEl, counterEl }
+        let cellSeq = 0;
+        let execCount = 0;
+
+        async function ensurePyodide() {
+            if (pyodideReady) return;
+            if (!window.loadPyodide) {
+            await new Promise((resolve, reject) => {
+                const s = document.createElement("script");
+                s.src = "https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js";
+                s.onload = resolve;
+                s.onerror = reject;
+                document.head.appendChild(s);
+            });
+            }
+            document.getElementById("kernelStatus").textContent = "🟡 Kernel 啟動中...";
+            pyodide = await loadPyodide({ indexURL: "https://cdn.jsdelivr.net/pyodide/v0.25.1/full/" });
+
+            await pyodide.loadPackage("matplotlib");
+            await loadChineseFont();
+
+            pyodideReady = true;
+            const el = document.getElementById("kernelStatus");
+            if (el) el.textContent = "🟢 Kernel 就緒";
+        }
+
+        async function loadChineseFont() {
+            try {
+                const fontResponse = await fetch("{% static 'pages/fonts/NotoSansTC-Regular.ttf' %}");
+                const fontBuffer = await fontResponse.arrayBuffer();
+                const fontBytes = new Uint8Array(fontBuffer);
+
+                pyodide.FS.writeFile("/tmp/NotoSansTC-Regular.ttf", fontBytes);
+
+                pyodide.runPython(`
+                import matplotlib.font_manager as fm
+                import matplotlib.pyplot as plt
+
+                fm.fontManager.addfont("/tmp/NotoSansTC-Regular.ttf")
+                plt.rcParams["font.sans-serif"] = ["Noto Sans TC"]
+                plt.rcParams["axes.unicode_minus"] = False
+                `);
+            } catch (err) {
+                console.error("中文字型載入失敗：", err);
+            }
+        }
+
+        function getLevel() {
+            return levels[selectedLevel];
+        }
+        function showStory(level) {
+            if (!storyIframe) {
+                storyIframe = document.createElement("iframe");
+                storyIframe.id = "storyIframe";
+                storyIframe.allow = "autoplay; fullscreen";
+                document.getElementById("iframeWrap").appendChild(storyIframe);
+            }
+            if (storyIframe.src !== level.story_url) {
+                storyIframe.src = level.story_url;
+                storyIframe.title = `${level.title} 劇情`;
+            }
+            storyHost.hidden = false;
+            tabBody.hidden = true;
+        }
+
+        let warmupIframe = null;
+
+        function prefetchStory(level) {
+            if (!level || !level.story_url || level.unlocked === false) return;
+            if (warmupIframe && warmupIframe.dataset.url === level.story_url) return;
+            const conn = navigator.connection;
+            if (conn && (conn.saveData || /2g/.test(conn.effectiveType))) return;
+
+            const base = "https://ypvisblity.github.io/chapter_python/";
+            if (!level.story_url.startsWith(base)) return;
+            const dir = new URL(".", level.story_url).href.slice(base.length);   // 例如 "ch_1/"
+
+            if (!warmupIframe) {
+                warmupIframe = document.createElement("iframe");
+                warmupIframe.style.display = "none";   // 不能用 hidden，會被你 CSS 的 iframe{display:block} 蓋掉
+                document.body.appendChild(warmupIframe);
+            }
+            // 同時只暖一關：滑鼠移到別關時，換 src 會中斷上一關的下載
+            warmupIframe.dataset.url = level.story_url;
+            warmupIframe.src = `${base}warmup.html?dir=${encodeURIComponent(dir)}`;
+        }
+
+        function whenIdle(fn) {
+            if ("requestIdleCallback" in window) requestIdleCallback(fn, { timeout: 3000 });
+            else setTimeout(fn, 1500);   // Safari 沒有 requestIdleCallback
+        }
+
+        function hideStory() {
+            storyHost.hidden = true;
+            tabBody.hidden = false;
+        }
+
+        document.getElementById("storyFullscreenBtn").addEventListener("click", () => {
+            const wrap = document.getElementById("iframeWrap");
+            if (wrap.requestFullscreen) wrap.requestFullscreen();
+            else if (wrap.webkitRequestFullscreen) wrap.webkitRequestFullscreen();
+        });	
+
+        function renderTab() {
+            hideStory();
+            const level = getLevel();
+            const storyOnly = level.story_only === true;
+
+            if (storyOnly) {
+                selectedTab = "story";
+                selectedTopic = null;
+            }
+
+            levelTitle.textContent = `${level.chapter}：${level.title}`;
+            levelMeta.textContent = `小關：${level.level} · 難度：${level.difficulty}`;
+
+            document.querySelectorAll(".level-node").forEach((node) => {
+                node.classList.toggle("is-selected", node.dataset.level === selectedLevel);
+            });
+
+            document.querySelectorAll(".tab-button").forEach((button) => {
+                button.hidden = storyOnly && button.dataset.tab !== "story";
+                button.classList.toggle("is-active", button.dataset.tab === selectedTab);
+            });
+
+            if (selectedTab === "story") {
+                if (!level.story_url) {
+                    tabBody.innerHTML = `
+                        <div class="paper-card" style="max-width:680px;margin:40px auto;text-align:center;">
+                            <h3>${level.title}</h3>
+                            <p>尚未設定劇情網址。</p>
+                            <p style="color:#64748b;">請在 ${level.id}/level.json 的 story_url 填入劇情連結。</p>
+                        </div>
+                    `;
+                    return;
+                }
+                showStory(level);
+                return;
+            }
+
+            if (selectedTab === "game") {
+            tabBody.innerHTML = `
+            <div class="notebook-wrap" id="notebookWrap">
+                <!-- Notebook Toolbar -->
+                <div class="nb-toolbar">
+                    <span class="nb-title">${level.title}</span>
+                    <div class="nb-toolbar-actions">
+                        <button class="nb-btn" id="questionBtn">收起題目</button>
+                        <button class="nb-btn" id="runAllBtn">▶▶ Run All</button>
+                        <button class="nb-btn" id="addCellBtn">＋ 新增 Cell</button>
+                        <button class="nb-btn" id="fullscreenBtn">全螢幕</button>
+                    </div>
+                </div>
+                <!--Question區-->
+                <div class="nb-question" id="nbQuestion" style="display:block"><p>${selectedTopic ? selectedTopic.description : level.description || ""}</p></div>
+                <!-- Cells 區 -->
+                <div class="nb-cells" id="nbCells"></div>
+
+                <!-- 底部提交列 -->
+                <div class="nb-footer">
+                    <span class="nb-kernel-status" id="kernelStatus">⚪ Kernel 載入中...</span>
+                    <div class="nb-submit-row">
+                        <input class="nb-player-input" id="playerName" placeholder="玩家名稱" value="{{ user_name }}">
+                        <button class="nb-submit-btn" id="submitButton">⬆ 提交 .ipynb</button>
+                        <span class="nb-submit-status" id="submitStatus"></span>
+                    </div>
+                </div>
+
+                <!-- 鑑定回饋區 -->
+                <div class="nb-feedback" id="nbFeedback" style="display:none"></div>
+            </div>
+            `;
+            initNotebook(level);
+
+            return;
+            }
+            if (selectedTab === "topic"){
+                const level = getLevel();
+                const topics = level.topics || [];
+                tabBody.innerHTML = `
+                    <div class="topic-list">
+                        <h3 class="topic-heading">${level.title} 題目列表</h3>
+                        <div class="topic-grid">
+                            ${topics.map(t => `
+                                <button class="topic-card" data-topic-id="${t.id}">
+                                    <span class="topic-id">${t.id.split('-').slice(-1)[0]}題</span>
+                                    <span class="topic-title">${t.title}</span>
+                                    <span class="topic-desc">${t.description}</span>
+                                </button>
+                            `).join("")}
+                        </div>
+                    </div>
+                `;
+                document.querySelectorAll(".topic-card").forEach(btn => {
+                    btn.addEventListener("click", () => {
+                        selectedTopic = level.topics.find(t => t.id === btn.dataset.topicId);
+                        selectedTab = "game";
+                        renderTab();
+                    });
+                });
+                return;
+            }
+            if (selectedTab === "discussion") {
+                const level = getLevel();
+                const topics = level.topics || [];
+                tabBody.innerHTML = `
+                    <div class="discussion-wrap">
+                        <div class="discussion-selector">
+                            <h3 class="discussion-heading">${level.title} 討論區</h3>
+                            <div class="discussion-topic-grid">
+                                ${topics.length === 0 
+                                    ? '<p style="color:#6b7280">此關卡尚無題目討論區</p>'
+                                    : topics.map(t => `
+                                        <button class="discussion-topic-btn ${currentDiscussionId === t.id ? 'is-active' : ''}" data-id="${t.id}">
+                                            ${t.title}
+                                        </button>
+                                    `).join("")
+                                }
+                            </div>
+                        </div>
+                        <div class="discussion-board" id="discussionBoard">
+                            ${currentDiscussionId 
+                                ? '<div class="discussion-loading">載入中...</div>'
+                                : '<div class="discussion-empty">請選擇題目開始討論</div>'
+                            }
+                        </div>
+                    </div>
+                `;
+                document.querySelectorAll(".discussion-topic-btn").forEach(btn => {
+                    btn.addEventListener("click", () => {
+                        document.querySelectorAll(".discussion-topic-btn").forEach(b => b.classList.remove("is-active"));
+                        btn.classList.add("is-active");
+                        currentDiscussionId = btn.dataset.id;
+                        loadDiscussion(currentDiscussionId);
+                    });
+                });
+                if (currentDiscussionId) loadDiscussion(currentDiscussionId);
+                return;
+            }
+            if (selectedTab === "stats"){
+                tabBody.innerHTML = `
+                    <div class="stats-grid">
+                        <article class="paper-card">
+                            <h4>章節</h4>
+                            <p>${level.chapter}</p>
+                        </article>
+                        <article class="paper-card">
+                            <h4>小關</h4>
+                            <p>${level.level}</p>
+                        </article>
+                        <article class="paper-card">
+                            <h4>關卡重點</h4>
+                            <p>${level.summary}</p>
+                        </article>
+                    </div>
+                `;
+            }   
+        }
+        document.querySelectorAll(".level-node").forEach((node) => {
+            const go = () => prefetchStory(levels[node.dataset.level]);
+            node.addEventListener("mouseenter", go, { once: true });
+            node.addEventListener("touchstart", go, { once: true, passive: true });
+        });        
+        function openLevel(levelId) {
+            const isLoggedIn = {{ user.is_authenticated|yesno:"true,false" }};
+            const level = levels[levelId];
+
+            if (levelId === "chapter-2-level-1") {
+                showClosedLevelToast();
+                return;
+            }
+
+            if (!isLoggedIn) {
+                alert("請先登入才能挑戰關卡！");
+                window.location.href = "{% url 'login' %}";
+                return;
+            }
+
+            if (level && level.unlocked === false) {
+                showUnlockOptions(levelId, level);
+                return;
+            }
+
+            selectedLevel = levelId;
+            selectedTab = "story";
+            selectedTopic = null;
+            currentDiscussionId = null;
+            detailPanel.classList.add("is-open");
+            renderTab();
+            detailPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+
+        async function unlockLevel(levelId) {
+            const res = await fetch(`/levels/${levelId}/unlock/`, {
+                method: "POST",
+                headers: { "X-CSRFToken": getCookie("csrftoken") },
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                alert(data.error || "解鎖失敗");
+                return;
+            }
+            alert("解鎖成功");
+            location.reload();
+        }
+
+        //解鎖選項彈窗
+        const unlockModal = document.getElementById("unlockModal");
+        const unlockModalTitle = document.getElementById("unlockModalTitle");
+        const unlockOptions = document.getElementById("unlockOptions");
+        const closeUnlockModalButton = document.getElementById("closeUnlockModal");
+
+        function hideUnlockModal() {
+            unlockModal.hidden = true;
+        }
+
+        closeUnlockModalButton?.addEventListener("click", hideUnlockModal);
+        unlockModal?.addEventListener("click", (event) => {
+            if (event.target === unlockModal) hideUnlockModal();
+        });
+
+        function showUnlockOptions(levelId, level) {
+            unlockModalTitle.textContent = `「${level.title}」尚未解鎖`;
+            const options = [];
+
+            if (level.unlock_test_level && levels[level.unlock_test_level]) {
+                const testLevel = levels[level.unlock_test_level];
+                options.push(`
+                    <div class="shop-item">
+                        <strong>通過額外題目「${testLevel.title}」</strong>
+                        <p>先挑戰這一關額外題目，過關後這一關會直接解鎖。</p>
+                        <button type="button" data-goto-level="${level.unlock_test_level}">前往挑戰</button>
+                    </div>
+                `);
+            }
+
+            if (level.unlock_prev_chapter_gate) {
+                options.push(`
+                    <div class="shop-item">
+                        <strong>完成前一章所有關卡</strong>
+                        <p>把前一章的每一小關全部過關，這一關就會自動解鎖。</p>
+                    </div>
+                `);
+            }
+
+            if (level.unlock_cost !== null && level.unlock_cost !== undefined) {
+                options.push(`
+                    <div class="shop-item">
+                        <strong>花費點數解鎖</strong>
+                        <p>花費 ${level.unlock_cost} 點數，直接解鎖這一關。</p>
+                        <button type="button" data-buy-level="${levelId}">花費 ${level.unlock_cost} 點解鎖</button>
+                    </div>
+                `);
+            }
+
+            if (options.length === 0) {
+                options.push(`<div class="shop-item"><p>此關卡目前尚未開放解鎖條件。</p></div>`);
+            }
+
+            unlockOptions.innerHTML = options.join("");
+
+            unlockOptions.querySelectorAll("[data-goto-level]").forEach((btn) => {
+                btn.addEventListener("click", () => {
+                    hideUnlockModal();
+                    openLevel(btn.dataset.gotoLevel);
+                });
+            });
+
+            unlockOptions.querySelectorAll("[data-buy-level]").forEach((btn) => {
+                btn.addEventListener("click", () => {
+                    hideUnlockModal();
+                    unlockLevel(btn.dataset.buyLevel);
+                });
+            });
+
+            unlockModal.hidden = false;
+        }
+
+        function showUnlockToast(titles) {
+            const toast = document.createElement("div");
+            toast.className = "unlock-toast";
+            toast.innerHTML = `
+                <div>解鎖新關卡！</div>
+                <p>${titles.join("、")}</p>
+            `;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
+        }
+
+        function showClosedLevelToast() {
+            document.querySelector(".unlock-toast.is-closed")?.remove();
+
+            const toast = document.createElement("div");
+            toast.className = "unlock-toast is-closed";
+            toast.setAttribute("role", "alert");
+            toast.setAttribute("aria-live", "assertive");
+            toast.innerHTML = `
+                <div>關卡已關閉</div>
+                <p>2-1 目前暫不開放。</p>
+            `;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
+        }
+
+        async function refreshUnlockStatus() {
+            let status;
+            try {
+                const res = await fetch("/levels/unlock-status/");
+                if (!res.ok) return;
+                status = await res.json();
+            } catch (err) {
+                return;
+            }
+
+            const newlyUnlockedTitles = [];
+
+            Object.entries(status).forEach(([lid, info]) => {
+                const level = levels[lid];
+                if (!level) return;
+
+                const wasLocked = level.unlocked === false;
+                level.unlocked = info.unlocked;
+                level.unlock_reason = info.reason;
+                level.unlock_cost = info.cost;
+                level.unlock_test_level = info.test_level;
+                level.unlock_prev_chapter_gate = info.prev_chapter_gate;
+
+                if (wasLocked && info.unlocked) newlyUnlockedTitles.push(level.title);
+
+                const node = document.querySelector(`.level-node[data-level="${lid}"]`);
+                if (!node) return;
+                node.classList.toggle("is-locked", !info.unlocked);
+                node.dataset.unlocked = info.unlocked ? "true" : "false";
+                node.dataset.unlockCost = info.cost ?? "";
+                node.dataset.unlockTestLevel = info.test_level ?? "";
+                node.dataset.unlockPrevChapterGate = info.prev_chapter_gate ? "true" : "false";
+
+                const icon = node.querySelector(".level-icon");
+                if (icon) {
+                    if (!info.unlocked) {
+                        icon.textContent = "🔒";
+                    } else if (level.story_only === true) {
+                        icon.textContent = "📖";
+                    } else {
+                        const image = document.createElement("img");
+                        image.src = levelIconUrl;
+                        image.alt = "";
+                        image.setAttribute("aria-hidden", "true");
+                        icon.replaceChildren(image);
+                    }
+                }
+            });
+
+            if (newlyUnlockedTitles.length) showUnlockToast(newlyUnlockedTitles);
+        }
+
+        //建立單一 Cell
+        function createCell(initialCode = "") {
+            cellSeq++;
+            const id = `cell-${cellSeq}`;
+
+            const cellEl = document.createElement("div");
+            cellEl.className = "nb-cell";
+            cellEl.dataset.id = id;
+            cellEl.innerHTML = `
+            <div class="nb-cell-gutter">
+                <button class="nb-run-btn" title="執行 (Shift+Enter)">▶</button>
+                <span class="nb-counter" id="counter-${id}">[ ]</span>
+                
+            </div>
+            <div class="nb-cell-body">
+                <div class="nb-editor" id="editor-${id}"></div>
+                <div class="nb-output" id="output-${id}"></div>
+            </div>
+            <button class="nb-del-btn" title="刪除此 Cell">✕</button>
+            `;
+
+            document.getElementById("nbCells").appendChild(cellEl);
+
+            // 載入 CodeMirro（若尚未載入則動態注入）
+        function mountEditor() {
+            const editor = CodeMirror(document.getElementById(`editor-${id}`), {
+                value: initialCode,
+                mode: "python",
+                theme: "dracula",
+                lineNumbers: true,
+                matchBrackets: true,
+                autoCloseBrackets: true,
+                indentUnit: 4,
+                extraKeys: {
+                    "Shift-Enter": () => runCell(id),
+                    "Tab": (cm) => cm.execCommand("indentMore"),
+                }
+            });
+            editor.on("focus", () => {
+                document.querySelectorAll(".nb-cell").forEach(c => c.classList.remove("is-active"));
+                cellEl.classList.add("is-active");
+            });
+            const outputEl = document.getElementById(`output-${id}`);
+            const counterEl = document.getElementById(`counter-${id}`);
+            nbCells.set(id, { editor, outputEl, counterEl, cellEl });
+            }
+
+            cellEl.querySelector(".nb-run-btn").addEventListener("click", () => runCell(id));
+
+            // 確保 CodeMirror已載入
+            if (window.CodeMirror) {
+            mountEditor();
+            } else {
+            loadCodeMirror().then(mountEditor);
+            }
+
+            // 刪除 Cell
+            cellEl.querySelector(".nb-del-btn").addEventListener("click", () => {
+            if (nbCells.size <= 1) return;
+            nbCells.delete(id);
+            cellEl.remove();
+            });
+
+            return id;
+        }
+            //動態載入 CodeMirror
+        function loadCodeMirror() {
+            return new Promise((resolve) => {
+            if (window.CodeMirror) return resolve();
+            const css1 = document.createElement("link");
+            css1.rel = "stylesheet";
+            css1.href = "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css";
+            document.head.appendChild(css1);
+
+            const css2 = document.createElement("link");
+            css2.rel = "stylesheet";
+            css2.href = "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css";
+            document.head.appendChild(css2);
+
+            const js = document.createElement("script");
+            js.src = "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js";
+            js.onload = () => {
+                const py = document.createElement("script");
+                py.src = "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js";
+                py.onload = () => {
+                    const ab = document.createElement("script");
+                    ab.src = "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js";
+                    ab.onload = resolve;
+                    document.head.appendChild(ab);
+                };
+                document.head.appendChild(py);
+            };
+            document.head.appendChild(js);
+            });
+        }
+        async function runCell(id) {
+            const { editor, outputEl, counterEl, cellEl } = nbCells.get(id);
+            const code = editor.getValue().trim();
+            if (!code) return;
+
+            sessionTimeout.keepAlive();   // 正在解題，延長登入時間
+            await ensurePyodide();
+            
+            // 自動偵測並安裝需要的套件
+            try {
+            await pyodide.loadPackagesFromImports(code);
+            } catch(e) { /* 忽略安裝錯誤 */ }
+
+            cellEl.classList.add("is-running");
+            counterEl.textContent = "[*]";
+            outputEl.className = "nb-output";
+            outputEl.innerHTML = "";  // 改用 innerHTML 清空，因為輸出可能包含圖片元素，不是單純文字
+
+            try {
+            // 捕捉 stdout
+            pyodide.runPython(`
+            import sys, io as _io
+            _buf = _io.StringIO()
+            sys.stdout = _buf
+            sys.stderr = _buf
+            `);
+            let result;
+            try {
+                result = pyodide.runPython(code);
+            } finally {
+                pyodide.runPython("sys.stdout = sys.__stdout__; sys.stderr = sys.__stderr__");
+            }
+            const stdout = pyodide.runPython("_buf.getvalue()");
+
+            execCount++;
+            counterEl.textContent = `[${execCount}]`;
+
+            let out = stdout || "";
+            if (result !== undefined && result !== null && String(result) !== "undefined") {
+                out += (out ? "\n" : "") + String(result);
+            }
+
+            // 執行完後檢查有沒有 matplotlib 圖片可以抓
+            const imgBase64 = await captureMatplotlibFigure();
+
+            if (out.trim()) {
+                const textDiv = document.createElement("div");
+                textDiv.className = "nb-output-text";
+                textDiv.textContent = out;
+                outputEl.appendChild(textDiv);
+                outputEl.classList.add("is-stdout");
+            }
+
+            if (imgBase64) {
+                const img = document.createElement("img");
+                img.src = `data:image/png;base64,${imgBase64}`;
+                img.className = "nb-output-image";
+                outputEl.appendChild(img);
+                outputEl.classList.add("has-content");
+            }
+            } catch (err) {
+            execCount++;
+            counterEl.textContent = `[${execCount}]`;
+            outputEl.textContent = String(err);
+            outputEl.classList.add("is-error");
+            }
+
+            cellEl.classList.remove("is-running");
+        }
+
+        // 檢查目前 pyodide 環境裡的 matplotlib 是否畫了圖，畫了就轉成 base64 PNG 回傳
+        async function captureMatplotlibFigure() {
+            try {
+                const hasFigure = pyodide.runPython(`
+                import sys
+                'matplotlib' in sys.modules and len(__import__('matplotlib.pyplot', fromlist=['get_fignums']).get_fignums()) > 0
+                `);
+                                if (!hasFigure) return null;
+
+                                const base64 = pyodide.runPython(`
+                import io, base64
+                import matplotlib.pyplot as plt
+                _img_buf = io.BytesIO()
+                plt.savefig(_img_buf, format='png', bbox_inches='tight')
+                plt.close('all')
+                base64.b64encode(_img_buf.getvalue()).decode('utf-8')
+                `);
+                return base64;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        //組出標準.ipynb
+        function buildIpynb() {
+            const cells = [...nbCells.values()].map(({ editor }) => {
+            const source = editor.getValue();
+            return {
+                cell_type: "code",
+                execution_count: null,
+                metadata: {},
+                outputs: [],
+                source: source.split("\n").map((line, i, arr) =>
+                    i < arr.length - 1 ? line + "\n" : line
+                )
+            };
+            }).filter(c => c.source.join("").trim() !== "");
+
+            return {
+            nbformat: 4,
+            nbformat_minor: 5,
+            metadata: {
+                kernelspec: { display_name: "Python 3", language: "python", name: "python3" },
+                language_info: { name: "python", version: "3.10.0" }
+            },
+            cells
+            };
+        }
+
+        //提交.ipynb到 Django
+        async function submitNotebook(topic) {
+            const levelId = topic?.id || selectedTopic?.id || selectedLevel;
+            const status = document.getElementById("submitStatus");
+            const player = document.getElementById("playerName")?.value || "player";
+            const notebook = buildIpynb();
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 150000); // 150秒
+
+
+            if (notebook.cells.length === 0) {
+            status.textContent = "請先在Cell中輸入程式碼。";
+            return;
+            }
+
+            const body = new URLSearchParams();
+            body.set("level", levelId);
+            body.set("player", player);
+            body.set("notebook", JSON.stringify(notebook));// ← 送.ipynb JSON
+
+            status.textContent="提交中...";
+
+            try {
+            const response = await fetch("/submit-solution/", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body,
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            
+            const result = await response.json();
+            status.textContent = result.message;
+            updateDayGoal(result.day_complete);
+            if (result.total_points !== null && result.total_points !== undefined) {
+                const pointBadge = document.getElementById("pointBadge");
+                if (pointBadge) pointBadge.textContent = `點數 ${result.total_points}`;
+            }
+
+            if (result.daily_point > 0){
+                status.textContent += ` 每日任務獎勵 +${result.daily_point} 點！`;
+            }
+
+            // 顯示 PyBryt回饋
+            if (result.feedback && result.feedback.length > 0) {
+                const fb = document.getElementById("nbFeedback");
+                fb.style.display = "block";
+                fb.innerHTML = `
+                <h4 class="fb-title">${result.passed ? "全部通過！" : "PyBryt鑑定回饋"}</h4>
+                <ul class="fb-list">
+                ${result.feedback.map(f => `
+                    <li class="fb-item ${f.passed ? 'fb-pass' : 'fb-fail'}">
+                    <span class="fb-icon">${f.passed ? '正確':'錯誤'}</span>
+                    <span class="fb-name">${f.name}</span>
+                    <span class="fb-msg">${f.message}</span>
+                    </li>
+                `).join("")}
+                </ul>
+            `;
+            }
+
+            if (result.passed) refreshUnlockStatus();
+            } catch (err) {
+                if (err.name === "AbortError") {
+                    status.textContent = "提交逾時，請稍後再試。";
+                } else {
+                    status.textContent = "提交失敗，請確認 Django 伺服器仍在執行。";
+                }
+            }
+	    }
+
+        //初始化整個 Notebook
+        function initNotebook(level) {
+            nbCells.clear();
+            cellSeq = 0;
+            execCount = 0;
+
+            const topic = selectedTopic;
+
+            if (pyodideReady) {
+                setTimeout(() => {
+                    const el = document.getElementById("kernelStatus");
+                    if (el) el.textContent = "🟢 Kernel 就緒";
+                }, 100);
+            }
+            //先載入 CodeMirror，再建立初始 cell
+            loadCodeMirror().then(() => {
+                
+                if (topic && topic.example_code) {
+                    createLockedCell(topic.example_code);
+                }
+
+                const starterCode = topic
+                    ? `# ${topic.title}\n${topic.starter_code}`
+                    : `# ${level.title}\n# ${level.warn}\n\n`;
+                createCell(starterCode);
+                
+                // 鎖定程式碼 
+                // const testCode = topic ? topic.test_code : level.test_code;
+                // if (testCode) {
+                //     createLockedCell(testCode);
+                // }
+            });
+            // 啟動 Pyodide（背景執行，不阻塞UI）
+            ensurePyodide();
+
+            // 綁定按鈕
+            document.getElementById("questionBtn").addEventListener("click", () => {
+                const q = document.getElementById("nbQuestion");
+                const btn = document.getElementById("questionBtn");
+                if (q.style.display === "none") {
+                    q.style.display = "block";
+                    btn.textContent = "收起題目";
+                } else {
+                    q.style.display = "none";
+                    btn.textContent = "題目";
+                }
+            });       
+            document.getElementById("addCellBtn").addEventListener("click", () => createCell());
+            document.getElementById("runAllBtn").addEventListener("click", async () => {
+            for (const id of nbCells.keys()) await runCell(id);
+            });
+            document.getElementById("submitButton").addEventListener("click", () => submitNotebook(selectedTopic));
+            document.getElementById("fullscreenBtn").addEventListener("click", () => {
+                const wrap = document.getElementById("notebookWrap");
+                const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement;
+                if (!fullscreenElement) {
+                    if (wrap.requestFullscreen) {
+                        wrap.requestFullscreen();
+                    } else if (wrap.webkitRequestFullscreen) {
+                        wrap.webkitRequestFullscreen();
+                    }
+                } else {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    } else if (document.webkitExitFullscreen) {
+                        document.webkitExitFullscreen();
+                    }
+                }
+            });
+        }
+        // 鎖定cell
+        function createLockedCell(code) {
+        cellSeq++;
+        const id = `cell-${cellSeq}`;
+
+        const cellEl = document.createElement("div");
+        cellEl.className = "nb-cell nb-cell-locked";
+        cellEl.dataset.id = id;
+        cellEl.innerHTML = `
+            <div class="nb-cell-gutter">
+                <button class="nb-run-btn" title="執行 (Shift+Enter)">▶</button>
+                <span class="nb-counter" id="counter-${id}">[ ]</span>
+            </div>
+            <div class="nb-cell-body">
+                <div class="nb-editor" id="editor-${id}"></div>
+                <div class="nb-output" id="output-${id}"></div>
+            </div>
+            <span class="nb-locked-badge">範例（唯讀）</span>
+        `;
+
+        document.getElementById("nbCells").appendChild(cellEl);
+
+            const editor = CodeMirror(document.getElementById(`editor-${id}`), {
+                value: code,
+                mode: "python",
+                theme: "dracula",
+                lineNumbers: true,
+                readOnly: true,
+            });
+
+                const outputEl = document.getElementById(`output-${id}`);
+                const counterEl = document.getElementById(`counter-${id}`);
+                nbCells.set(id, { editor, outputEl, counterEl, cellEl });
+
+                cellEl.querySelector(".nb-run-btn").addEventListener("click", () => runCell(id));
+            };
+        
+        document.querySelector("#startButton").addEventListener("click", () => {
+                startScreen.style.display = "none";
+                mapScreen.classList.add("is-active");
+            });
+
+        document.querySelector("#backButton").addEventListener("click", () => {
+            mapScreen.classList.remove("is-active");
+            detailPanel.classList.remove("is-open");
+            startScreen.style.display = "grid";
+        });
+
+        document.querySelector("#closePanel").addEventListener("click", () => {
+            detailPanel.classList.remove("is-open");
+        });
+
+        document.querySelectorAll(".level-node").forEach((node) => {
+            node.addEventListener("click", () => openLevel(node.dataset.level));
+        });
+
+        document.querySelectorAll(".tab-button").forEach((button) => {
+            button.addEventListener("click", () => {
+                selectedTab = button.dataset.tab;
+                renderTab();
+            });
+        });
+
+        function escapeHtml(value) {
+            return String(value ?? "").replace(/[&<>"']/g, character => ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#039;",
+            })[character]);
+        }
+
+        function renderCommentEmoji(emoji) {
+            if (!emoji) return "";
+            return `
+                <img
+                    class="comment-emoji"
+                    src="${escapeHtml(emoji.image_url)}"
+                    alt="${escapeHtml(emoji.name)}"
+                    title="${escapeHtml(emoji.name)}"
+                >
+            `;
+        }
+
+        async function fetchOwnedEmojis() {
+            const response = await fetch("/api/emojis/owned/");
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || "無法取得表情");
+            }
+            return data.emojis || [];
+        }
+
+        function showSelectedEmoji(preview, input, emoji) {
+            preview.replaceChildren();
+
+            const image = document.createElement("img");
+            image.src = emoji.image_url;
+            image.alt = emoji.name;
+            image.title = emoji.name;
+
+            const removeButton = document.createElement("button");
+            removeButton.type = "button";
+            removeButton.className = "remove-emoji-button";
+            removeButton.textContent = "取消";
+            removeButton.onclick = () => {
+                input.value = "";
+                preview.replaceChildren();
+            };
+
+            preview.append(image, removeButton);
+        }
+
+        function setupEmojiPicker(button, picker, input, preview) {
+            if (!button || !picker || !input || !preview) return;
+
+            button.onclick = async () => {
+                if (!picker.hidden) {
+                    picker.hidden = true;
+                    return;
+                }
+
+                picker.hidden = false;
+                picker.innerHTML = '<p class="emoji-picker-message">載入中...</p>';
+
+                try {
+                    const emojis = await fetchOwnedEmojis();
+                    picker.replaceChildren();
+
+                    if (emojis.length === 0) {
+                        const message = document.createElement("p");
+                        message.className = "emoji-picker-message";
+                        message.textContent = "你還沒有購買表情";
+                        picker.appendChild(message);
+                        return;
+                    }
+
+                    emojis.forEach(emoji => {
+                        const option = document.createElement("button");
+                        option.type = "button";
+                        option.className = "emoji-option";
+                        option.title = emoji.name;
+
+                        const image = document.createElement("img");
+                        image.src = emoji.image_url;
+                        image.alt = emoji.name;
+                        option.appendChild(image);
+
+                        option.onclick = () => {
+                            input.value = emoji.id;
+                            showSelectedEmoji(preview, input, emoji);
+                            picker.hidden = true;
+                        };
+                        picker.appendChild(option);
+                    });
+                } catch (error) {
+                    picker.innerHTML = `<p class="emoji-picker-message">${escapeHtml(error.message)}</p>`;
+                }
+            };
+        }
+
+        async function loadDiscussion(levelId) {
+            const board = document.getElementById("discussionBoard");
+            if (!board) return;
+            board.innerHTML = `<div class="discussion-loading">載入中...</div>`;
+
+            const res = await fetch(`/api/posts/?level_id=${levelId}`);
+            const data = await res.json();
+            renderDiscussion(board, levelId, data.posts);
+        }
+
+        function renderDiscussion(board, levelId, posts) {
+            const isLoggedIn = {{ user.is_authenticated|yesno:"true,false" }};
+            const username = "{{ user.username }}";
+
+            board.innerHTML = `
+                ${isLoggedIn ? `
+                <div class="discussion-new-post">
+                    <textarea class="discussion-textarea" id="newPostContent" placeholder="分享你的想法..."></textarea>
+                    <input type="hidden" id="newPostEmojiId">
+                    <div class="discussion-composer-toolbar">
+                        <div class="emoji-control">
+                            <button type="button" class="emoji-toggle-button" id="newPostEmojiButton">😊 表情</button>
+                            <div class="emoji-picker" id="newPostEmojiPicker" hidden></div>
+                        </div>
+                        <div class="selected-emoji-preview" id="newPostEmojiPreview"></div>
+                        <button type="button" class="discussion-submit-btn" id="newPostBtn">發表</button>
+                    </div>
+                </div>
+                ` : `<div class="discussion-login-hint">請<a href="/accounts/login/">登入</a>後發表留言</div>`}
+                <div id="postList">
+                    ${posts.length === 0 ? '<div class="discussion-empty">還沒有留言，來第一個發表吧！</div>' : ""}
+                    ${posts.map(p => renderPost(p, username)).join("")}
+                </div>
+            `;
+
+            if (isLoggedIn) {
+                setupEmojiPicker(
+                    document.getElementById("newPostEmojiButton"),
+                    document.getElementById("newPostEmojiPicker"),
+                    document.getElementById("newPostEmojiId"),
+                    document.getElementById("newPostEmojiPreview")
+                );
+
+                document.getElementById("newPostBtn").addEventListener("click", async () => {
+                    const content = document.getElementById("newPostContent").value.trim();
+                    const emojiId = document.getElementById("newPostEmojiId").value;
+                    if (!content && !emojiId) {
+                        alert("請輸入內容或選擇表情");
+                        return;
+                    }
+                    const res = await fetch("/api/posts/create/", {
+                        method: "POST",
+                        headers: {"Content-Type": "application/json", "X-CSRFToken": getCookie("csrftoken")},
+                        body: JSON.stringify({ level_id: levelId, content, emoji_id: emojiId || null })
+                    });
+                    const post = await res.json();
+                    if (!res.ok) {
+                        alert(post.error || "留言發表失敗");
+                        return;
+                    }
+                    document.getElementById("newPostContent").value = "";
+                    document.getElementById("newPostEmojiId").value = "";
+                    document.getElementById("newPostEmojiPreview").replaceChildren();
+                    document.getElementById("postList").insertAdjacentHTML("afterbegin", renderPost(post, username));
+                    bindPostEvents();
+                });
+            }
+            bindPostEvents();
+        }
+
+        function renderPost(p, username) {
+            return `
+                <div class="discussion-post" data-id="${p.id}">
+                    <div class="post-header">
+                        <img src="${p.avatar_url}" class="post-avatar" alt="頭像">
+                        <span class="post-author">${escapeHtml(p.author)}</span>
+                        <span class="post-time">${escapeHtml(p.created_at)}</span>
+                    </div>
+                    <div class="post-content">${escapeHtml(p.content)}</div>
+                    ${renderCommentEmoji(p.emoji)}
+                    <div class="post-actions">
+                        <button class="post-like-btn ${p.liked ? 'is-liked' : ''}" data-id="${p.id}">
+                            👍 ${p.likes}
+                        </button>
+                        <button class="post-show-replies-btn" data-id="${p.id}">
+                            🗨 展示 ${(p.replies || []).length} 條回覆
+                        </button>
+                        <button class="post-reply-btn" data-id="${p.id}">↩ 回覆</button>
+                        <button class="post-copy-btn" data-content="${encodeURIComponent(p.content)}">複製</button>
+                    </div>
+                    <div class="reply-form" id="reply-form-${p.id}" style="display:none;">
+                        <textarea class="discussion-textarea" id="reply-content-${p.id}" placeholder="輸入回覆..."></textarea>
+                        <input type="hidden" id="reply-emoji-${p.id}">
+                        <div class="discussion-composer-toolbar">
+                            <div class="emoji-control">
+                                <button type="button" class="emoji-toggle-button reply-emoji-button" data-id="${p.id}">😊 表情</button>
+                                <div class="emoji-picker" id="reply-emoji-picker-${p.id}" hidden></div>
+                            </div>
+                            <div class="selected-emoji-preview" id="reply-emoji-preview-${p.id}"></div>
+                            <button type="button" class="discussion-submit-btn reply-submit-btn" data-id="${p.id}">送出回覆</button>
+                        </div>
+                    </div>
+                    <div class="post-replies" style="display:none">
+                        ${(p.replies || []).map(r => `
+                            <div class="discussion-reply">
+                                <img src="${r.avatar_url}" class="post-avatar-small" alt="頭像">
+                                <span class="post-author">${escapeHtml(r.author)}</span>
+                                <span class="post-time">${escapeHtml(r.created_at)}</span>
+                                <div class="post-content">${escapeHtml(r.content)}</div>
+                                ${renderCommentEmoji(r.emoji)}
+                            </div>
+                        `).join("")}
+                    </div>
+                </div>
+            `;
+        }
+
+        function bindPostEvents() {
+            // 按讚
+            document.querySelectorAll(".post-like-btn").forEach(btn => {
+                btn.onclick = async () => {
+                    const id = btn.dataset.id;
+                    const res = await fetch(`/api/posts/${id}/like/`, {
+                        method: "POST",
+                        headers: {"X-CSRFToken": getCookie("csrftoken")}
+                    });
+                    const data = await res.json();
+                    btn.textContent = `👍 ${data.likes}`;
+                    btn.classList.toggle("is-liked", data.liked);
+                };
+            });
+
+            // 回覆按鈕
+            document.querySelectorAll(".post-reply-btn").forEach(btn => {
+                btn.onclick = () => {
+                    const form = document.getElementById(`reply-form-${btn.dataset.id}`);
+                    form.style.display = form.style.display === "none" ? "block" : "none";
+                };
+            });
+
+            document.querySelectorAll(".reply-emoji-button").forEach(btn => {
+                const id = btn.dataset.id;
+                setupEmojiPicker(
+                    btn,
+                    document.getElementById(`reply-emoji-picker-${id}`),
+                    document.getElementById(`reply-emoji-${id}`),
+                    document.getElementById(`reply-emoji-preview-${id}`)
+                );
+            });
+
+            // 送出回覆
+            document.querySelectorAll(".reply-submit-btn").forEach(btn => {
+                btn.onclick = async () => {
+                    const id = btn.dataset.id;
+                    const content = document.getElementById(`reply-content-${id}`).value.trim();
+                    const emojiInput = document.getElementById(`reply-emoji-${id}`);
+                    const emojiId = emojiInput.value;
+                    if (!content && !emojiId) {
+                        alert("請輸入回覆或選擇表情");
+                        return;
+                    }
+                    const res = await fetch(`/api/posts/${id}/reply/`, {
+                        method: "POST",
+                        headers: {"Content-Type": "application/json", "X-CSRFToken": getCookie("csrftoken")},
+                        body: JSON.stringify({ content, emoji_id: emojiId || null })
+                    });
+                    const reply = await res.json();
+                    if (!res.ok) {
+                        alert(reply.error || "回覆發表失敗");
+                        return;
+                    }
+                    const repliesDiv = document.querySelector(`[data-id="${id}"] .post-replies`);
+                    repliesDiv.insertAdjacentHTML("beforeend", `
+                        <div class="discussion-reply">
+                            <img src="${escapeHtml(reply.avatar_url)}" class="post-avatar-small" alt="頭像">
+                            <span class="post-author">${escapeHtml(reply.author)}</span>
+                            <span class="post-time">${escapeHtml(reply.created_at)}</span>
+                            <div class="post-content">${escapeHtml(reply.content)}</div>
+                            ${renderCommentEmoji(reply.emoji)}
+                        </div>
+                    `);
+                    document.getElementById(`reply-content-${id}`).value = "";
+                    emojiInput.value = "";
+                    document.getElementById(`reply-emoji-preview-${id}`).replaceChildren();
+                    document.getElementById(`reply-form-${id}`).style.display = "none";
+                };
+            });
+            document.querySelectorAll(".post-show-replies-btn").forEach(btn => {
+                btn.onclick = () => {
+                    const repliesDiv = btn.closest(".discussion-post").querySelector(".post-replies");
+                    repliesDiv.style.display = repliesDiv.style.display === "none" ? "block" : "none";
+                };
+            });
+
+            // 複製
+            document.querySelectorAll(".post-copy-btn").forEach(btn => {
+                btn.onclick = () => {
+                    const content = decodeURIComponent(btn.dataset.content);
+                    navigator.clipboard.writeText(content).then(() => {
+                        btn.textContent = "✅ 已複製";
+                        setTimeout(() => btn.textContent = "📋 複製", 1500);
+                    });
+                };
+            });
+        }
+
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(";").shift();
+        }
+        //商店
+        const shopModal = document.getElementById("shopModal");
+        const openShopButton = document.getElementById("openShopButton");
+        const closeShopButton = document.getElementById("closeShopButton");
+        const shopCategoryButtons = document.querySelectorAll("#shopModal .shop-category-button");
+        const shopItems = document.querySelectorAll("#shopGrid .shop-item[data-category]");
+        const shopCategoryEmpty = document.getElementById("shopCategoryEmpty");
+        const inventoryModal = document.getElementById("inventoryModal");
+        const openInventoryButton = document.getElementById("openInventoryButton");
+        const closeInventoryButton = document.getElementById("closeInventoryButton");
+        const inventoryCategoryButtons = document.querySelectorAll("#inventoryModal .inventory-category-button");
+        const inventoryGrid = document.getElementById("inventoryGrid");
+        const inventoryEmpty = document.getElementById("inventoryEmpty");
+        const inventoryCategoryEmpty = document.getElementById("inventoryCategoryEmpty");
+
+        openShopButton?.addEventListener("click", () => {
+            shopModal.hidden = false;
+        });
+
+        closeShopButton?.addEventListener("click", () => {
+            shopModal.hidden = true;
+        });
+
+        shopModal?.addEventListener("click", (event) => {
+            if (event.target === shopModal) {
+                shopModal.hidden = true;
+            }
+        });
+
+        openInventoryButton?.addEventListener("click", () => {
+            inventoryModal.hidden = false;
+        });
+
+        closeInventoryButton?.addEventListener("click", () => {
+            inventoryModal.hidden = true;
+        });
+
+        inventoryModal?.addEventListener("click", (event) => {
+            if (event.target === inventoryModal) {
+                inventoryModal.hidden = true;
+            }
+        });
+
+        function filterItems(buttons, items, selectedButton, emptyEl) {
+            const selectedCategory = selectedButton.dataset.category;
+            let visibleCount = 0;
+
+            buttons.forEach((button) => {
+                button.classList.toggle("is-active", button === selectedButton);
+            });
+
+            items.forEach((item) => {
+                const shouldShow = selectedCategory === "all" || item.dataset.category === selectedCategory;
+                item.hidden = !shouldShow;
+                if (shouldShow) {
+                    visibleCount += 1;
+                }
+            });
+
+            if (emptyEl) {
+                emptyEl.hidden = visibleCount > 0;
+            }
+
+            return visibleCount;
+        }
+
+        function refreshInventoryFilter() {
+            const activeButton = document.querySelector("#inventoryModal .inventory-category-button.is-active");
+            const inventoryItems = inventoryGrid
+                ? inventoryGrid.querySelectorAll(".inventory-owned-item[data-category]")
+                : [];
+            const visibleCount = activeButton
+                ? filterItems(inventoryCategoryButtons, inventoryItems, activeButton, inventoryCategoryEmpty)
+                : inventoryItems.length;
+
+            if (inventoryEmpty) {
+                inventoryEmpty.hidden = inventoryItems.length > 0;
+            }
+
+            if (inventoryCategoryEmpty && inventoryItems.length === 0) {
+                inventoryCategoryEmpty.hidden = true;
+            }
+
+            return visibleCount;
+        }
+
+        shopCategoryButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+                filterItems(shopCategoryButtons, shopItems, button, shopCategoryEmpty);
+            });
+        });
+
+        inventoryCategoryButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+                const inventoryItems = inventoryGrid
+                    ? inventoryGrid.querySelectorAll(".inventory-owned-item[data-category]")
+                    : [];
+                filterItems(inventoryCategoryButtons, inventoryItems, button, inventoryCategoryEmpty);
+                if (inventoryEmpty) {
+                    inventoryEmpty.hidden = inventoryItems.length > 0;
+                }
+                if (inventoryCategoryEmpty && inventoryItems.length === 0) {
+                    inventoryCategoryEmpty.hidden = true;
+                }
+            });
+        });
+
+        function addItemToInventory(shopItem) {
+            if (!inventoryGrid || !shopItem) return;
+            const itemId = shopItem.dataset.itemId;
+            if (inventoryGrid.querySelector(`[data-item-id="${itemId}"]`)) return;
+
+            const inventoryItem = shopItem.cloneNode(true);
+            inventoryItem.classList.add("inventory-owned-item");
+            inventoryItem.querySelector("button")?.remove();
+            inventoryItem.insertAdjacentHTML("beforeend", '<div class="inventory-meta">已擁有</div>');
+            inventoryGrid.prepend(inventoryItem);
+
+            if (inventoryEmpty) {
+                inventoryEmpty.hidden = true;
+            }
+            refreshInventoryFilter();
+        }
+
+        document.querySelectorAll(".buy-item").forEach((button) => {
+            button.addEventListener("click", async () => {
+                const itemId = button.dataset.itemId;
+                const response = await fetch(`/shop/items/${itemId}/buy/`, {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": getCookie("csrftoken"),
+                    },
+                });
+                const data = await response.json();
+
+                if (!response.ok) {
+                    alert(data.error || "購買失敗");
+                    return;
+                }
+
+                const point = document.getElementById("userPoints");
+                if (point) {
+                    point.textContent = data.points;
+                }
+
+                const pointBadge = document.getElementById("pointBadge");
+                if (pointBadge) {
+                    pointBadge.textContent = `點數 ${data.points}`;
+                }
+
+                addItemToInventory(button.closest(".shop-item"));
+                button.textContent = "已購買";
+                button.disabled = true;
+            });
+        });
+
+        // ========== AI 小助手浮動視窗 ==========
+        const aiFloatPanel = document.getElementById("aiFloatPanel");
+        const aiFloatHeader = document.getElementById("aiFloatHeader");
+        const aiFloatClose = document.getElementById("aiFloatClose");
+        const aiFloatBody = document.getElementById("aiFloatBody");
+        const aiFloatInput = document.getElementById("aiFloatInput");
+        const aiFloatSend = document.getElementById("aiFloatSend");
+        const aiFloatContext = document.getElementById("aiFloatContext");
+        const aiFloatResize = document.getElementById("aiFloatResize");
+
+        function updateAiFloatContext() {
+            if (!aiFloatContext) return;
+            if (selectedTopic) {
+                aiFloatContext.textContent = selectedTopic.title;
+                aiFloatContext.hidden = false;
+            } else {
+                aiFloatContext.textContent = "";
+                aiFloatContext.hidden = true;
+            }
+        }
+
+        function appendAiFloatMsg(text, role) {
+            const row = document.createElement("div");
+            row.className = `ai-float-row ai-float-row-${role}`;
+
+            if (role === "bot" || role === "loading") {
+                const avatar = document.createElement("img");
+                avatar.className = "ai-float-avatar";
+                avatar.src = aiFloatBody.dataset.aiAvatarUrl;
+                avatar.alt = "AI 頭像";
+                row.appendChild(avatar);
+            }
+
+            const msg = document.createElement("div");
+            msg.className = `ai-float-msg ai-float-msg-${role}`;
+            msg.textContent = text;
+            row.appendChild(msg);
+            aiFloatBody.appendChild(row);
+            aiFloatBody.scrollTop = aiFloatBody.scrollHeight;
+            // 思考中提示移除時，連同頭像一起移除。
+            return row;
+        }
+
+        aiFloatClose?.addEventListener("click", () => {
+            aiFloatPanel.hidden = true;
+        });
+
+        async function sendAiFloatMessage() {
+            const question = aiFloatInput.value.trim();
+            if (!question) return;
+
+            // 帶入目前選中的 topic 作為上下文
+            const contextPrefix = selectedTopic
+                ? `[目前關卡：${selectedTopic.title}] `
+                : "";
+            const fullMessage = contextPrefix + question;
+
+            appendAiFloatMsg(question, "user");
+            aiFloatInput.value = "";
+            aiFloatInput.style.height = "auto";
+            aiFloatSend.disabled = true;
+
+            const loadingMsg = appendAiFloatMsg("思考中...", "loading");
+
+            try {
+                const response = await fetch("{% url 'ai_chat' %}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": getCookie("csrftoken"),
+                    },
+                    body: JSON.stringify({ message: fullMessage }),
+                });
+                const data = await response.json();
+                loadingMsg.remove();
+
+                if (data.reply) {
+                    appendAiFloatMsg(data.reply, "bot");
+                    if (typeof data.remaining_free_uses !== "undefined") {
+                        appendAiFloatMsg(
+                            `（今日剩餘免費次數：${data.remaining_free_uses}，目前點數：${data.points}）`,
+                            "bot"
+                        );
+                    }
+                } else {
+                    appendAiFloatMsg(data.error || "發生錯誤，請稍後再試。", "bot");
+                }
+            } catch (err) {
+                loadingMsg.remove();
+                appendAiFloatMsg("連線失敗，請確認網路狀態。", "bot");
+            } finally {
+                aiFloatSend.disabled = false;
+            }
+        }
+
+        aiFloatSend?.addEventListener("click", sendAiFloatMessage);
+        aiFloatInput?.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                sendAiFloatMessage();
+            }
+        });
+        aiFloatInput?.addEventListener("input", () => {
+            aiFloatInput.style.height = "32px";
+            aiFloatInput.style.height = Math.min(aiFloatInput.scrollHeight,80)+"px";
+        });
+
+        // 拖曳視窗
+        (function enableDrag() {
+            let isDragging = false;
+            let offsetX = 0, offsetY = 0;
+
+            aiFloatHeader?.addEventListener("mousedown", (e) => {
+                if (e.target === aiFloatClose) return;
+                isDragging = true;
+                const rect = aiFloatPanel.getBoundingClientRect();
+                offsetX = e.clientX - rect.left;
+                offsetY = e.clientY - rect.top;
+                aiFloatPanel.style.right = "auto";
+                aiFloatPanel.style.left = rect.left + "px";
+                aiFloatPanel.style.top = rect.top + "px";
+            });
+
+            document.addEventListener("mousemove", (e) => {
+                if (!isDragging) return;
+                let newLeft = e.clientX - offsetX;
+                let newTop = e.clientY - offsetY;
+                newLeft = Math.max(0, Math.min(newLeft, window.innerWidth - aiFloatPanel.offsetWidth));
+                newTop = Math.max(0, Math.min(newTop, window.innerHeight - aiFloatPanel.offsetHeight));
+                aiFloatPanel.style.left = newLeft + "px";
+                aiFloatPanel.style.top = newTop + "px";
+            });
+
+            document.addEventListener("mouseup", () => {
+                isDragging = false;
+            });
+        })();
+
+        // 縮放視窗
+        (function enableResize() {
+            let isResizing = false;
+            let startX = 0, startY = 0, startWidth = 0, startHeight = 0;
+
+            aiFloatResize?.addEventListener("mousedown", (e) => {
+                isResizing = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                startWidth = aiFloatPanel.offsetWidth;
+                startHeight = aiFloatPanel.offsetHeight;
+                e.preventDefault();
+            });
+
+            document.addEventListener("mousemove", (e) => {
+                if (!isResizing) return;
+                const newWidth = startWidth + (e.clientX - startX);
+                const newHeight = startHeight + (e.clientY - startY);
+                aiFloatPanel.style.width = Math.max(260, newWidth) + "px";
+                aiFloatPanel.style.height = Math.max(280, newHeight) + "px";
+            });
+
+            document.addEventListener("mouseup", () => {
+                isResizing = false;
+            });
+        })();
+
+        // ===== 網站背景音樂 =====
+        const bgMusic = document.getElementById("bgMusic");
+
+        function initBgMusic() {
+            const savedVolume = localStorage.getItem("cq_volume");
+            const initialVolume = savedVolume !== null ? Number(savedVolume) : 50;
+            if (bgMusic) bgMusic.volume = initialVolume / 100;
+            if (volumeSlider) {
+                volumeSlider.value = initialVolume;
+                volumeValue.textContent = `${initialVolume}%`;
+            }
+        }
+
+        // 瀏覽器會擋自動播放帶聲音的媒體，要等使用者第一次互動才能真正播放
+        document.querySelector("#startButton").addEventListener("click", () => {
+            bgMusic?.play().catch(() => {});
+        });
+
+        // ===== 設定選單 =====
+        const settingsModal = document.getElementById("settingsModal");
+        const openSettingsButton = document.getElementById("openSettingsButton");
+        const closeSettingsButton = document.getElementById("closeSettingsButton");
+        const volumeSlider = document.getElementById("volumeSlider");
+        const volumeValue = document.getElementById("volumeValue");
+        const openAiFromSettings = document.getElementById("openAiFromSettings");
+        const settingsChapterList = document.getElementById("settingsChapterList");
+
+        async function openSettingsModal() {
+            settingsModal.hidden = false;
+        }
+
+        function closeSettingsModal() {
+            settingsModal.hidden = true;
+        }
+
+        openSettingsButton?.addEventListener("click", openSettingsModal);
+        closeSettingsButton?.addEventListener("click", closeSettingsModal);
+        settingsModal?.addEventListener("click", (event) => {
+            if (event.target === settingsModal) closeSettingsModal();
+        });
+
+        volumeSlider?.addEventListener("input", () => {
+            const val = volumeSlider.value;
+            volumeValue.textContent = `${val}%`;
+            localStorage.setItem("cq_volume", val);
+            if (bgMusic) bgMusic.volume = val / 100;
+        });
+
+        openAiFromSettings?.addEventListener("click", () => {
+            {% if not user.is_authenticated %}
+                window.location.href = "{% url 'login' %}?next={{ request.path|urlencode }}%3Fview%3Dmap";
+                return;
+            {% endif %}
+            closeSettingsModal();
+            aiFloatPanel.hidden = false;
+            updateAiFloatContext();
+            aiFloatInput.focus();
+        });
+
+        function renderSettingsChapterList() {
+            if (!settingsChapterList) return;
+            const levelIds = Object.keys(levels).filter((id) => levels[id].story_only !== true);
+
+            settingsChapterList.innerHTML = levelIds.map((id) => {
+                const level = levels[id];
+                const locked = level.unlocked === false;
+                return `
+                    <button type="button"
+                        class="settings-chapter-link ${locked ? 'is-locked' : ''}"
+                        data-goto-level="${id}"
+                        ${locked ? 'disabled' : ''}>
+                        <span>${level.title}${locked ? ' 🔒' : ''}</span>
+                        <span class="settings-chapter-code">${level.chapter} · ${level.level}</span>
+                    </button>
+                `;
+            }).join("");
+
+            settingsChapterList.querySelectorAll("[data-goto-level]:not([disabled])").forEach((btn) => {
+                btn.addEventListener("click", () => {
+                    goToTopicFromSettings(btn.dataset.gotoLevel);
+                });
+            });
+        }
+
+        function goToTopicFromSettings(levelId) {
+            closeSettingsModal();
+            startScreen.style.display = "none";
+            mapScreen.classList.add("is-active");
+            openLevel(levelId);
+            selectedTab = "topic";
+            renderTab();
+        }
+
+        initBgMusic();
+
+        // 從其他頁面回來時，直接顯示關卡地圖。
+        (function checkDirectToMap() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get("view") === "map") {
+                startScreen.style.display = "none";
+                mapScreen.classList.add("is-active");
+            }
+        })();
+
+        const topicNavModal = document.getElementById("topicNavModal");
+        const closeTopicNavButton = document.getElementById("closeTopicNavButton");
+        const topicNavList = document.getElementById("topicNavList");
+
+        // 點擊前往題目：關閉設定視窗，開啟題目導覽視窗
+        document.getElementById("goToTopicListBtn")?.addEventListener("click", async () => {
+            closeSettingsModal();
+            topicNavModal.hidden = false;
+            topicNavList.innerHTML = '<p class="settings-loading">載入解鎖狀態中...</p>';
+            await refreshUnlockStatus();
+            renderTopicNavList();
+        });
+
+        closeTopicNavButton?.addEventListener("click", () => {
+            topicNavModal.hidden = true;
+        });
+        topicNavModal?.addEventListener("click", (event) => {
+            if (event.target === topicNavModal) topicNavModal.hidden = true;
+        });
+
+        // 渲染獨立視窗裡的章節列表
+        function renderTopicNavList() {
+            if (!topicNavList) return;
+            const levelIds = Object.keys(levels).filter((id) => levels[id].story_only !== true);
+
+            topicNavList.innerHTML = levelIds.map(id => {
+                const level = levels[id];
+                const locked = level.unlocked === false;
+                return `
+                    <button type="button"
+                        class="settings-chapter-link ${locked ? 'is-locked' : ''}"
+                        data-goto-level="${id}"
+                        ${locked ? 'disabled' : ''}>
+                        <span>${level.title}${locked ? ' 🔒' : ''}</span>
+                        <span class="settings-chapter-code">${level.chapter} · ${level.level}</span>
+                    </button>
+                `;
+            }).join("");
+
+            topicNavList.querySelectorAll("[data-goto-level]:not([disabled])").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    topicNavModal.hidden = true;   // 點選關卡後也要關掉這個導覽視窗
+                    goToTopicFromSettings(btn.dataset.gotoLevel);
+                });
+            });
+        }
+        //新手導覽
+        const showOnboarding = {{show_onboarding|yesno:"true,false"}};
+        if (showOnboarding){
+            (function () {
+                //黑色遮罩
+                const overlay = document.getElementById("onboardingOverlay");
+                //對話框
+                const box = document.getElementById("onboardingBox");
+                //跳過
+                const skipButton = document.getElementById("skiponboarding");
+                //下一步
+                const nextButton = document.getElementById("nextonboarding");
+                //標題
+                const title = document.getElementById("onboardingTitle");
+                //文字
+                const text = document.getElementById("onboardingText");
+                //教學目標
+                let currentTarget = null;
+                let currentParent = null;
+                let targetClickHandler = null;
+                let currentStep = 0;
+                const onboardingSteps = [
+                    {
+                        target: "#startButton",
+                        title: "開始遊戲",
+                        text: "點這裡進入你的第一個程式關卡。",
+                        advanceOnTargetClick: true
+                    },
+                    {
+                        target: "#pointBadge",
+                        title: "點數",
+                        text: "完成關卡後會獲得點數，點數可以用來解鎖關卡",
+                        advanceOnTargetClick: false
+                    },
+                    {% if shop_enabled %}
+                    {
+                        target: "#openShopButton",
+                        title: "商店",
+                        text: "這邊可以打開商店，商店裡存放外觀以及關卡可用的道具",
+                        advanceOnTargetClick: true
+                    },
+                    {
+                        target: "#shopModal .shop-category-button[data-category='general']",
+                        title: "一般分類",
+                        text: "點這裡可以查看一般類型的商品。",
+                        advanceOnTargetClick: true
+                    },
+                    {
+                        target: "#shopGrid .shop-item:not([hidden])",
+                        title: "商品內容",
+                        text: "商品卡片會顯示分類、名稱、說明、價格和購買按鈕。",
+                        advanceOnTargetClick: false
+                    },
+                    {
+                        target: "#closeShopButton",
+                        title: "關閉商店",
+                        text: "看完商店後，點這裡回到主畫面。",
+                        advanceOnTargetClick: true
+                    },
+                    {% endif %}
+                    {
+                        target: "#openInventoryButton",
+                        title: "物品欄",
+                        text: "點這裡查看你已經擁有的物品。",
+                        advanceOnTargetClick: true
+                    },
+                    {
+                        target: "#inventoryEmpty",
+                        title: "物品欄內容",
+                        text: "你買到的物品會出現在這裡。",
+                        advanceOnTargetClick: false
+                    },
+                    {
+                        target: "#closeInventoryButton",
+                        title: "關閉物品欄",
+                        text: "看完物品欄後，點這裡關閉。",
+                        advanceOnTargetClick: true
+                    },
+                    {
+                        target: ".level-node[data-level='chapter-1-level-1']",
+                        title: "第一章第一關",
+                        text: "接著點擊 1-1 關卡，查看這一關的內容。",
+                        advanceOnTargetClick: true
+                    },
+                    {
+                        target: ".tab-button[data-tab='story']",
+                        title: "劇情",
+                        text: "這裡可以查看關卡的劇情說明。",
+                        advanceOnTargetClick: true
+                    },
+                    {
+                        target: ".tab-button[data-tab='topic']",
+                        title: "題目",
+                        text: "點這裡查看這一關有哪些題目。",
+                        advanceOnTargetClick: true
+                    },
+                    {
+                        target: ".topic-card[data-topic-id='chapter-1-level-1-1']",
+                        title: "1-1-1 題目",
+                        text: "選擇這個題目，開始練習第一個 Python 任務。",
+                        advanceOnTargetClick: true
+                    },
+                    {
+                        target: ".tab-button[data-tab='discussion']",
+                        title: "討論區",
+                        text: "遇到問題時，可以在這裡查看或發表討論。",
+                        advanceOnTargetClick: true
+                    },
+                    {
+                        target: ".tab-button[data-tab='stats']",
+                        title: "關卡統計",
+                        text: "這裡可以查看關卡相關的統計資訊。",
+                        advanceOnTargetClick: true
+                    },
+                    {
+                        target: "#closePanel",
+                        title: "關閉關卡",
+                        text: "看完後，可以點這裡關閉關卡面板。",
+                        advanceOnTargetClick: true
+                    }
+                ];
+
+                function closeonboarding(){
+                    if (currentTarget && targetClickHandler) {
+                        currentTarget.removeEventListener("click", targetClickHandler);
+                    }
+                    currentTarget?.classList.remove("onboarding-highlight");
+                    currentParent?.classList.remove("onboarding-parent");
+                    overlay?.remove();
+                    box?.remove();
+                }
+
+                function goNextOnboardingStep(){
+                    currentStep +=1;
+                    if (currentStep >= onboardingSteps.length){
+                        closeonboarding();
+                        return;
+                    }
+                    showOnboardingStep();
+                }
+                
+                function showOnboardingStep(){
+                    if (currentTarget && targetClickHandler) {
+                        currentTarget.removeEventListener("click", targetClickHandler);
+                        targetClickHandler = null;
+                    }
+                    currentTarget?.classList.remove("onboarding-highlight");
+                    currentParent?.classList.remove("onboarding-parent");
+                    //教學目標
+                    const step = onboardingSteps[currentStep];
+                    //教學目標按鈕
+                    currentTarget = document.querySelector(step.target);
+
+                    if (!currentTarget || !box || currentTarget.hidden) {
+                        setTimeout(showOnboardingStep,50);
+                        return;
+                    }
+                    //標題
+                    title.textContent = step.title;
+                    //文字
+                    text.textContent = step.text;
+
+                    const rect = currentTarget.getBoundingClientRect();
+                    currentTarget.classList.add("onboarding-highlight");
+                    currentParent = currentTarget.closest(".topbar, .modal, .shop-modal, .ai-float-panel");
+                    currentParent?.classList.add("onboarding-parent");
+
+                    if (step.advanceOnTargetClick){
+                        targetClickHandler = goNextOnboardingStep;
+                        currentTarget.addEventListener("click", targetClickHandler, { once: true });
+                    }
+
+                    let top = rect.bottom +18;
+                    let left = rect.left;
+
+                    if(top + box.offsetHeight > window.innerHeight){
+                        top = rect.top - box.offsetHeight - 18;
+                    }
+
+                    if(left + box.offsetWidth > window.innerWidth){
+                        left = window.innerWidth - box.offsetWidth -16;
+                    }
+                    box.style.position = "fixed";
+                    box.style.top = Math.max(16,top) + "px";
+                    box.style.left = Math.max(18,left) + "px";
+                    if (step.advanceOnTargetClick){
+                        nextButton.hidden = true;
+                    }
+                    else{
+                        nextButton.hidden = false;
+
+                        if (currentStep === onboardingSteps.length - 1) {
+                            nextButton.textContent = "完成";
+                    }
+                        else{
+                            nextButton.textContent = "下一步";
+                    }
+                    }
+                    
+                }
+                showOnboardingStep();
+                window.addEventListener("resize",showOnboardingStep);
+                window.addEventListener("scroll",showOnboardingStep);
+
+                
+
+                skipButton?.addEventListener("click",closeonboarding);
+                nextButton?.addEventListener("click", goNextOnboardingStep);
+
+            })();
+        }
+        function showInstruction(sectionId) {
+            document.querySelectorAll(".instruction_section").forEach((section) => {
+                section.hidden = true;
+            });
+
+            document.querySelectorAll(".instruction_menu button").forEach((button) => {
+                button.classList.remove("is-active");
+            });
+        
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.hidden = false;
+            }
+
+            const targetButton = document.querySelector(`[data-instruction-target="${sectionId}"]`);
+            const featureSections = ["selfLearning", "gamifiedLearning", "aiHelper", "shopInventory"];
+
+            if (featureSections.includes(sectionId)) {
+                document.querySelector(".instruction_dropdown_toggle")?.classList.add("is-active");
+            } else {
+                targetButton?.classList.add("is-active");
+            }
+        }
+
+        function toggleInstructionMenu() {
+            const dropdown = document.getElementById("instructionDropdown");
+            dropdown?.classList.toggle("is_open");
+        }
+
+        function closeInstructionMenu() {
+            const dropdown = document.getElementById("instructionDropdown");
+            dropdown?.classList.remove("is_open");
+        }
+
+        const dayGoalMenu = document.getElementById("dayGoalMenu")
+        function updateDayGoal(value){
+            if (!dayGoalMenu || value === null || value === undefined) return;
+
+            const number = Number(value);
+            if (!Number.isFinite(number)) return;
+            const completed = Math.max(0, Math.min(Math.floor(number), 3));
+
+            // 更新文字
+            document.getElementById("dayGoal").textContent =
+                `每日任務 ${completed}/3 題`;
+
+            // 任務
+            dayGoalMenu.querySelectorAll(".dayGoal-goal").forEach(task => {
+                const target = Number(task.dataset.target);
+                const current = Math.min(completed, target);
+                const percent = Math.round(current / target * 100);
+                // 題數
+                task.querySelector(".dayGoal-count").textContent =
+                    percent === 100
+                        ? "✓ 已完成"
+                        : `${current}/${target} 題`;
+                // 百分比
+                task.querySelector(".dayGoal-percent").textContent =
+                    `${percent}%`;
+                // 進度條
+                task.querySelector(".dayGoal-progress").value = percent;
+                task.classList.toggle("is-complete", percent === 100);
+            });
+        }
+
+        // 放在按鈕下方
+        function positionDayGoal() {
+            if (!dayGoalMenu || !dayGoalMenu.open) return;
+        
+            const panel = document.getElementById("dayGoalControl");
+            const button = dayGoalMenu.querySelector("summary");
+            const rect = button.getBoundingClientRect();
+        
+            const top = Math.max(12,Math.min(rect.bottom + 10, window.innerHeight - 180));
+            const left = Math.max(12,Math.min(rect.left, window.innerWidth - panel.offsetWidth - 12));
+        
+            panel.style.top = `${top}px`;
+            panel.style.left = `${left}px`;
+            panel.style.maxHeight =
+                `${Math.max(0, window.innerHeight - top - 12)}px`;
+        }
+
+        if (dayGoalMenu) {
+            // 讀取後端傳來的題數
+            updateDayGoal(dayGoalMenu.dataset.completed);
+        
+            // 更新面板位置
+            dayGoalMenu.addEventListener("toggle", positionDayGoal);
+            window.addEventListener("resize", positionDayGoal);
+            window.addEventListener("scroll", positionDayGoal, { passive: true });
+        
+            // 點擊選單外側時回收menu
+            document.addEventListener("click", event => {
+                if (!dayGoalMenu.contains(event.target)) {
+                    dayGoalMenu.open = false;
+                }
+            });
+        
+            // 按esc時同上
+            document.addEventListener("keydown", event => {
+                if (event.key === "Escape" && dayGoalMenu.open) {
+                    dayGoalMenu.open = false;
+                    dayGoalMenu.querySelector("summary").focus();
+                }
+            });
+        }
+        
+
+        // ===== 登入逾時倒數 =====
+        // 伺服器設定閒置 SESSION_COOKIE_AGE 秒就登出，每次對本站的請求都會重新計時。
+        // 解程式題時 Pyodide 在瀏覽器執行、不會打到伺服器，所以前端自己倒數並提供「重新計時」。
+        const sessionTimeout = (() => {
+            if (!{{ user.is_authenticated|yesno:"true,false" }}) return { keepAlive() {} };
+
+            const SESSION_AGE = {{ session_age|default:600 }};
+            const WARNING_SECONDS = 60;
+            const LOGIN_URL = "{% url 'login' %}?next=/";
+            const timerEl = document.getElementById("sessionTimer");
+            const textEl = document.getElementById("sessionTimerText");
+            const originalFetch = window.fetch.bind(window);
+            let deadline = Date.now() + SESSION_AGE * 1000;
+            let expired = false;
+            let lastKeepAlive = 0;
+
+            function isOwnServer(input) {
+                const url = typeof input === "string" ? input : input.url;
+                return new URL(url, location.href).origin === location.origin;
+            }
+
+            function resetDeadline() {
+                deadline = Date.now() + SESSION_AGE * 1000;
+                tick();
+            }
+
+            // 任何對本站的請求成功，伺服器端都已重新計時，前端跟著重設；收到 401 代表已被登出
+            window.fetch = async (input, init) => {
+                const response = await originalFetch(input, init);
+                if (isOwnServer(input)) {
+                    const sentToLogin = response.redirected && new URL(response.url).pathname === "{% url 'login' %}";
+                    if (response.status === 401 || sentToLogin) expire();
+                    else if (response.ok) resetDeadline();
+                }
+                return response;
+            };
+
+            async function keepAlive() {
+                if (expired) return;
+                lastKeepAlive = Date.now();
+                try {
+                    await fetch("{% url 'session_keepalive' %}", {
+                        method: "POST",
+                        headers: { "X-CSRFToken": getCookie("csrftoken") },
+                    });
+                } catch (err) {
+                    console.error("重新計時失敗：", err);
+                }
+            }
+
+            async function expire() {
+                if (expired) return;
+                expired = true;
+                clearInterval(intervalId);
+                textEl.textContent = "00:00";
+                // 確保伺服器端也登出，避免前後端狀態不一致
+                try {
+                    await originalFetch("{% url 'logout' %}", {
+                        method: "POST",
+                        headers: { "X-CSRFToken": getCookie("csrftoken") },
+                    });
+                } catch (err) {}
+                alert("閒置時間過長，登入已逾時，請重新登入。");
+                location.href = LOGIN_URL;
+            }
+
+            function tick() {
+                if (expired) return;
+                const remaining = Math.max(0, Math.round((deadline - Date.now()) / 1000));
+                const mm = String(Math.floor(remaining / 60)).padStart(2, "0");
+                const ss = String(remaining % 60).padStart(2, "0");
+                textEl.textContent = `${mm}:${ss}`;
+                timerEl.classList.toggle("is-warning", remaining <= WARNING_SECONDS);
+                if (remaining === 0) expire();
+            }
+
+            document.getElementById("sessionResetBtn").addEventListener("click", keepAlive);
+            // 分頁切回來時立刻更新（背景分頁的計時器會被瀏覽器放慢）
+            document.addEventListener("visibilitychange", () => {
+                if (!document.hidden) tick();
+            });
+            const intervalId = setInterval(tick, 1000);
+            tick();
+
+            return {
+                // 解題操作（例如執行 Cell）時呼叫，一分鐘最多送一次
+                keepAlive() {
+                    if (Date.now() - lastKeepAlive > 60 * 1000) keepAlive();
+                },
+            };
+        })();
+    </script>
+</body>
+</html>

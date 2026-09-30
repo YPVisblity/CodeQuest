@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>老師檔案管理</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            color: #111827;
+            font-family: Arial, "Microsoft JhengHei", sans-serif;
+            background: #eef6f2;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 22px clamp(18px, 4vw, 44px);
+            border-bottom: 4px solid #111827;
+            background: #ffffff;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 28px;
+            letter-spacing: 0;
+        }
+
+        main {
+            width: min(980px, calc(100vw - 32px));
+            margin: 28px auto;
+        }
+
+        a {
+            color: #0f766e;
+            font-weight: 800;
+            text-decoration: none;
+        }
+
+        button {
+            border: 0;
+            padding: 13px 20px;
+            color: #102018;
+            border-radius: 8px;
+            background: #34d399;
+            box-shadow: 0 8px 0 #167853;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .progress-panel {
+            min-width: min(340px, 100%);
+            padding: 10px 12px;
+            border: 3px solid #111827;
+            border-radius: 8px;
+            background: #ffffff;
+            font-weight: 800;
+        }
+
+        .progress-panel progress {
+            width: 100%;
+            height: 16px;
+            margin-top: 6px;
+            accent-color: #0f766e;
+        }
+
+        .review-results {
+            margin-bottom: 24px;
+            border: 4px solid #111827;
+            border-radius: 8px;
+            background: #ffffff;
+        }
+
+        .review-results h2 {
+            margin: 0;
+            padding: 14px;
+            color: #ffffff;
+            background: #111827;
+            font-size: 20px;
+            letter-spacing: 0;
+        }
+
+        .review-result {
+            padding: 14px;
+            border-top: 2px solid #d1d5db;
+        }
+
+        .status-pass {
+            color: #047857;
+            font-weight: 800;
+        }
+
+        .status-fail {
+            color: #b91c1c;
+            font-weight: 800;
+        }
+
+        .status-skip {
+            color: #92400e;
+            font-weight: 800;
+        }
+
+        .row-status {
+            font-weight: 800;
+        }
+
+        .message-text {
+            margin: 8px 0 0;
+            white-space: pre-wrap;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            overflow: hidden;
+            border: 4px solid #111827;
+            border-radius: 8px;
+            background: #ffffff;
+        }
+
+        th,
+        td {
+            padding: 14px;
+            border-bottom: 2px solid #d1d5db;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            color: #ffffff;
+            background: #111827;
+        }
+
+        tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .empty {
+            padding: 28px;
+            border: 4px solid #111827;
+            border-radius: 8px;
+            background: #ffffff;
+            font-weight: 800;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>老師檔案管理</h1>
+        <div class="header-actions">
+            <button type="button" id="reviewButton">一鍵審查</button>
+            <button type="button" id="stopReviewButton" hidden>終止審查</button>
+            <div class="progress-panel" id="reviewProgress" hidden>
+                <div id="progressLabel">準備評測...</div>
+                <progress id="progressBar" value="0" max="100"></progress>
+            </div>
+            <a href="{% url 'home' %}">返回首頁</a>
+        </div>
+    </header>
+    <main>
+        <section class="review-results" id="reviewResults" {% if not review_results %}hidden{% endif %}>
+            <h2>一鍵審查結果</h2>
+            <div id="reviewResultList">
+                {% for result in review_results %}
+                    <div class="review-result">
+                        <strong>{{ result.filename }}</strong>
+                        <span>
+                            {% if result.passed == True %}
+                                <span class="status-pass">通過</span>
+                            {% elif result.passed == False %}
+                                <span class="status-fail">未通過</span>
+                            {% else %}
+                                <span class="status-skip">未評測</span>
+                            {% endif %}
+                        </span>
+                        <div>關卡：{{ result.level }}{% if result.steps %}，執行步數：{{ result.steps }}{% endif %}</div>
+                        {% if result.messages %}
+                            <p class="message-text">{{ result.messages }}</p>
+                        {% endif %}
+                        {% if result.feedback %}
+                            <ul>
+                                {% for item in result.feedback %}
+                                    <li>
+                                        {% if item.passed %}通過{% else %}未通過{% endif %}
+                                        {{ item.name }}{% if item.message %}：{{ item.message }}{% endif %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% if files %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>檔案名稱</th>
+                        <th>評測</th>
+                        <th>大小</th>
+                        <th>修改時間</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for file in files %}
+                        <tr data-filename="{{ file.name }}" data-reviewable="{{ file.can_review|yesno:'true,false' }}">
+                            <td><a href="{% url 'teacher_file_edit' file.name %}">{{ file.name }}</a></td>
+                            <td class="row-status">{% if file.can_review %}可評測{% else %}不可評測{% endif %}</td>
+                            <td>{{ file.size }} bytes</td>
+                            <td>{{ file.modified_at|date:"Y-m-d H:i:s" }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="empty">目前 submissions 資料夾裡沒有可編輯的學生檔案。</div>
+        {% endif %}
+    </main>
+    <script>
+        const reviewButton = document.getElementById("reviewButton");
+        const reviewProgress = document.getElementById("reviewProgress");
+        const progressBar = document.getElementById("progressBar");
+        const progressLabel = document.getElementById("progressLabel");
+        const reviewResults = document.getElementById("reviewResults");
+        const reviewResultList = document.getElementById("reviewResultList");
+        const stopReviewButton = document.getElementById("stopReviewButton");
+        let shouldStopReview = false;
+        let currentController = null;
+
+        function statusText(result) {
+            if (result.passed === true) {
+                return "通過";
+            }
+            if (result.passed === false) {
+                return "未通過";
+            }
+            return "未評測";
+        }
+
+        function statusClass(result) {
+            if (result.passed === true) {
+                return "status-pass";
+            }
+            if (result.passed === false) {
+                return "status-fail";
+            }
+            return "status-skip";
+        }
+
+        function addReviewResult(result) {
+            const item = document.createElement("div");
+            item.className = "review-result";
+
+            const title = document.createElement("strong");
+            title.textContent = result.filename;
+            item.appendChild(title);
+
+            const status = document.createElement("span");
+            status.className = ` ${statusClass(result)}`;
+            status.textContent = ` ${statusText(result)}`;
+            item.appendChild(status);
+
+            const meta = document.createElement("div");
+            meta.textContent = `關卡：${result.level || "unknown-level"}${result.steps ? `，執行步數：${result.steps}` : ""}`;
+            item.appendChild(meta);
+
+            if (result.messages) {
+                const message = document.createElement("p");
+                message.className = "message-text";
+                message.textContent = result.messages;
+                item.appendChild(message);
+            }
+
+            if (Array.isArray(result.feedback) && result.feedback.length > 0) {
+                const list = document.createElement("ul");
+                result.feedback.forEach((feedback) => {
+                    const entry = document.createElement("li");
+                    entry.textContent = `${feedback.passed ? "通過" : "未通過"} ${feedback.name || ""}${feedback.message ? `：${feedback.message}` : ""}`;
+                    list.appendChild(entry);
+                });
+                item.appendChild(list);
+            }
+
+            reviewResultList.appendChild(item);
+        }
+
+        reviewButton?.addEventListener("click", async () => {
+            shouldStopReview = false;
+            currentController = null;
+            stopReviewButton.hidden = false;
+
+            const rows = [...document.querySelectorAll("tr[data-filename]")]
+                .filter((row) => row.dataset.reviewable === "true");
+            const total = rows.length;
+
+            reviewProgress.hidden = false;
+            reviewResults.hidden = false;
+            reviewResultList.innerHTML = "";
+
+            if (total === 0) {
+                progressBar.max = 100;
+                progressBar.value = 0;
+                progressLabel.textContent = "沒有可評測的檔案。";
+                stopReviewButton.hidden = true;
+                return;
+            }
+
+            reviewButton.disabled = true;
+            reviewButton.textContent = "評測中...";
+            progressBar.max = total;
+            progressBar.value = 0;
+            progressLabel.textContent = `評測進度：0 / ${total}`;
+
+            for (const row of rows) {
+                if (shouldStopReview) {
+                    break;
+                }
+
+                const filename = row.dataset.filename;
+                const statusCell = row.querySelector(".row-status");
+
+                progressLabel.textContent = `正在評測：${filename}`;
+                statusCell.textContent = "評測中...";
+                statusCell.className = "row-status status-skip";
+
+                try {
+                    currentController = new AbortController();
+                    const response = await fetch(
+                        `/teacher/files/${encodeURIComponent(filename)}/review/`,
+                        { signal: currentController.signal }
+                    );
+                    const result = await response.json();
+
+                    statusCell.textContent = statusText(result);
+                    statusCell.className = `row-status ${statusClass(result)}`;
+                    addReviewResult(result);
+                } catch (error) {
+                    if (error.name === "AbortError") {
+                        statusCell.textContent = "已終止";
+                        statusCell.className = "row-status status-skip";
+                        break;
+                    }
+
+                    const result = {
+                        filename,
+                        level: "unknown-level",
+                        passed: false,
+                        steps: null,
+                        messages: `評測錯誤：${error}`,
+                        feedback: [],
+                    };
+                    statusCell.textContent = "評測錯誤";
+                    statusCell.className = "row-status status-fail";
+                    addReviewResult(result);
+                }
+
+                progressBar.value += 1;
+                progressLabel.textContent = `評測進度：${progressBar.value} / ${total}`;
+            }
+
+            reviewButton.disabled = false;
+            stopReviewButton.hidden = true;
+            currentController = null;
+
+            if (shouldStopReview) {
+                reviewButton.textContent = "繼續一鍵審查";
+                progressLabel.textContent = `審查已終止：${progressBar.value} / ${total}`;
+            } else {
+                reviewButton.textContent = "重新審查";
+                progressLabel.textContent = `審查完成：${total} / ${total}`;
+            }
+        });
+
+        stopReviewButton?.addEventListener("click", () => {
+            shouldStopReview = true;
+            currentController?.abort();
+            progressLabel.textContent = "已終止審查";
+        });
+    </script>
+</body>
+</html>

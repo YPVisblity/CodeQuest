@@ -1,0 +1,10 @@
+{
+  "id": "chapter-1-level-2",
+  "chapter": "第 1 章第二關",
+  "level": "1-2",
+  "title": "基本語法",
+  "difficulty": "20％",
+  "story_url": "https://ypvisblity.github.io/chapter_python/ch_1-2/index.html",
+  "summary": "1-2描述",
+  "warn": "返回題目點選按鈕，進入關卡"
+}

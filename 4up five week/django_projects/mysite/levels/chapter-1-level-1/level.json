@@ -1,0 +1,10 @@
+{
+  "id": "chapter-1-level-1",
+  "chapter": "第 1 章第一關",
+  "level": "1-1",
+  "title": "環境與變數",
+  "difficulty": "20％",
+  "story_url": "https://ypvisblity.github.io/chapter_python/ch_1/index.html",
+  "summary": "1-1描述",
+  "warn": "返回題目點選按鈕，進入關卡"
+}

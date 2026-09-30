@@ -1,0 +1,12 @@
+{
+  "id": "chapter-4-level-1",
+  "chapter": "第 4 章第一關",
+  "level": "4-1",
+  "title": "圖片處理",
+  "difficulty": "60％",
+  "story_url": "",
+  "description": "使用 OpenCV 將圖片灰階化與二值化，找出輪廓並在原圖上繪製紅色邊界",
+  "summary": "學習灰階轉換、Otsu 二值化、輪廓尋找與輪廓繪製",
+  "warn": "完成程式後提交評測",
+  "unlock_rule": {"cost": 5}
+}

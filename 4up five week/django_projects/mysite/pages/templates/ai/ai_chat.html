@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 問答區 - Code Quest</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #0f172a; 
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+        }
+
+        .chat-container {
+            max-width: 800px;
+            margin: 30px auto;
+            background: #1e293b;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            height: 70vh;
+        }
+        
+        .chat-box {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 8px;
+            line-height: 1.5;
+        }
+
+        .ai-message {
+            align-self: flex-start;
+            background-color: #fdfeff;
+            color: #030303;
+            border-bottom-left-radius: 2px;
+
+            white-space: pre-wrap !important;
+            font-family: monospace, Consolas, "Courier New";
+        }
+        .ai-default{
+            align-self: flex-start;
+            background-color: #fdfeff;
+            color: #030303;
+            border-bottom-left-radius: 2px;
+        }
+
+        .user-message {
+            align-self: flex-end;
+            background-color: #475569;
+            color: #ffffff;
+            border-bottom-right-radius: 2px;
+        }
+
+        .input-area {
+            display: flex;
+            padding: 15px;
+            background: #111827;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+            gap: 10px;
+        }
+
+        .input-area input {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            background: #1f2937;
+            color: white;
+            font-size: 16px;
+        }
+
+        .input-area button {
+            padding: 12px 24px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .input-area button:hover {
+            background: #059669;
+        }
+    </style>
+</head>
+<body>
+	<div style="padding:15px;background:#111827;">
+        <a href="{% url 'home' %}?view=map" style="color:#3b82f6;text-decoration:none;">⬅ 回到首頁</a>
+    </div>
+
+    <div class="chat-container">
+        
+        <div class="chat-box" id="chatBox">
+            <div class="message ai-default">
+                你好！我是你的 AI 助手，請問今天想聊些什麼或遇到了什麼程式問題呢？<br>
+                每日有 {{ free_daily_limit }} 次免費對話機會，超過後每次對話會扣除 5 點點數。<br>
+                你今天剩餘免費次數：{{ remaining_free_uses }}，目前點數：{{ points }}。
+            </div>
+        </div>
+
+        <div id="loadingTimer" class="timer-bar">
+            <div style="width: 16px; height: 16px; border: 2px solid #475569; border-top: 2px solid #3b82f6; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+            <span style="color: #94a3b8; font-size: 14px;">AI 正在思考與搜尋中... <span id="secondsCount" style="color: #10b981; font-weight: bold;">0</span> 秒</span>
+        </div>
+
+        <form class="input-area" action="" method="POST" onsubmit="handleFormSubmit(event)">
+            {% csrf_token %}
+            <input type="text" id="userInput" placeholder="請輸入您的問題...">
+            <button type="submit" id="submitBtn">發送</button>
+        </form>
+    </div>
+	<style>
+	    @keyframes spin {
+		0% { transform: rotate(0deg); }
+		100% { transform: rotate(360deg); }
+	    }
+	</style>
+    <script>
+    	let timeInterval = null;
+    	let abortController = null; //控制中斷
+    	let isGenerating = false;   //目前是否正在生成回答
+    	
+    	function handleFormSubmit(event) {
+        event.preventDefault();
+        
+        if(isGenerating){
+            //如果正在生成，按鈕代表中止
+            stopGeneration();
+        }else{
+            //如果沒有在生成，正常發送訊息
+            sendMessage();
+        }
+        }
+        async function sendMessage(){ 
+            
+            const inputElement = document.getElementById('userInput');
+            const submitBtn = document.getElementById('submitBtn');
+            const messageText = inputElement.value.trim();
+            
+            if (messageText === ''){
+            alert("輸入內容不能為空！"); 
+            return;
+            }
+            // status change Generating
+            isGenerating =true;
+            submitBtn.innerText ="中止";
+            submitBtn.style.background ="#ef4444";
+
+            // 清空輸入欄位並捲動到底部
+            appendMessage(messageText, 'user-message');
+            inputElement.value = '';
+
+	    // 計時視窗
+	    const loadingTimer = document.getElementById('loadingTimer');
+	    const secondsCount = document.getElementById('secondsCount');
+	    let seconds = 0;
+	    
+	    secondsCount.innerText = seconds; //歸零
+    	    loadingTimer.style.display = 'flex'; //顯示小視窗 
+	    
+	    timerInterval = setInterval(() => {
+		seconds++;
+		secondsCount.innerText = seconds;
+	    }, 1000);
+	    
+	    //初始化中斷控制器 
+	    abortController=new AbortController();
+        const signal=abortController.signal;
+            
+        try {
+            const response = await fetch("{% url 'ai_chat' %}", {
+                method: "POST",
+                headers: {
+                    //告訴後端我們送的是 JSON 格式
+                    "Content-Type": "application/json",
+                    //帶上 Django 的安全防護憑證
+                    "X-CSRFToken": "{{ csrf_token }}" 
+                },
+                // 將 JavaScript 物件轉換成 JSON 字串送出
+                body: JSON.stringify({ message: messageText }),
+                signal: signal
+        });
+
+            const data = await response.json();
+
+            // 3. 將 Claude 回應寫在畫面上
+            if (response.ok && data.reply) {
+                appendMessage(data.reply, 'ai-message');
+                if (typeof data.remaining_free_uses !== 'undefined') {
+                    appendMessage(
+                        `（今日剩餘免費次數：${data.remaining_free_uses}，目前點數：${data.points}）`,
+                        'ai-default'
+                    );
+                }
+            }
+            else {
+                appendMessage("錯誤: " + (data.error || "未知錯誤"), 'ai-message');
+            }
+            }
+        catch (error) {
+        	if(isUserAborted || error.name === 'AbortError') {
+        	appendMessage("🛑 已由使用者終止回答。", 'ai-message');
+    		}
+    		else{
+        	appendMessage("連線失敗，請確認 Django 伺服器是否正常運行。", 'ai-message');
+    		}
+            }
+    	finally{
+    		resetStatus();
+        	}
+        }
+        // 中止函式
+        function stopGeneration() {
+            if (abortController) {
+                isUserAborted=true;
+                abortController.abort(); // 呼叫這個方法，Fetch就會立刻中斷並跳到catch
+            }
+        }
+        // 初始發送狀態的輔助功能
+        function resetStatus() {
+            isGenerating = false;
+            
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.innerText = "發送";
+            submitBtn.style.background = "#10b981"; //變回原本的綠色
+
+            clearInterval(timerInterval);
+            document.getElementById('loadingTimer').style.display = 'none';
+        }
+        // 輔助函式：用來將訊息文字包裝成 CSS 樣式並自動滾動到最下方
+        function appendMessage(text, className) {
+            const chatBox = document.getElementById('chatBox');
+            const div = document.createElement('div');
+            div.className = `message ${className}`;
+            div.innerText = text;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+    </script>
+</body>
+
+</html>

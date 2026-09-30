@@ -1,0 +1,46 @@
+商店模板
+老師首頁
+返回首頁按鈕
+老師頁面按鈕({% if is_teacher %})
+商店類別
+1-2 1-3題目
+物品欄  owned_items = UserItem.objects.filter(user=request.user).select_related("item").order_by("-purchased_at") inventoryGrid
+
+
+1-2-2:
+def grade(score):
+    if score >= 90:
+        return "A"
+    elif score >= 80:
+        return "B"
+    elif score >= 70:
+        return "C"
+    elif score >= 60:
+        return "D"
+    else:
+        return "F"
+1-2-3:
+def is_leap_year(year):
+    if year % 400 == 0:
+        return True
+    elif year % 100 == 0:
+        return False
+    elif year % 4 == 0:
+        return True
+    else:
+        return False
+1-3-2:
+def matrix_sum(matrix):
+    total = 0
+    for row in matrix:
+        for number in row:
+            total += number
+    return total
+1-3-3:
+def matrix_max(matrix):
+    max_value = matrix[0][0]
+    for row in matrix:
+        for number in row:
+            if number > max_value:
+                max_value = number
+    return max_value

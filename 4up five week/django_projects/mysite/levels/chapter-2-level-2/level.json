@@ -1,0 +1,11 @@
+{
+  "id": "chapter-2-level-2",
+  "chapter": "第 2 章第二關",
+  "level": "2-2",
+  "title": "檔案與例外處理",
+  "difficulty": "40％",
+  "story_url": "https://ypvisblity.github.io/chapter_python/2-2/2-2-1.0-web/index.html",
+  "summary": "2-2描述",
+  "warn": "返回題目點選按鈕，進入關卡",
+  "unlock_rule": "free"
+}

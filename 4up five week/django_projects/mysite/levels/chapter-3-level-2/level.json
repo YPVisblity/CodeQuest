@@ -1,0 +1,12 @@
+{
+  "id": "chapter-3-level-2",
+  "chapter": "第 3 章第二關",
+  "level": "3-2",
+  "title": "影音處理",
+  "difficulty": "60％",
+  "story_url": "https://ypvisblity.github.io/chapter_python/3-3/3-3-1.0-web/index.html",
+  "description": "教育訓練影片庫遭病毒感染，AI 寫的下載模組沒有檢查檔案完整性，損毀的影片也被當成下載成功",
+  "summary": "AI 只負責寫程式碼，不負責檢查邏輯是否正確，學生需自行驗證下載檔案的完整性",
+  "warn":"返回題目點選按鈕，進入關卡",
+  "unlock_rule": {"cost": 5, "test_level": "chapter-3-bonus-1"}
+}

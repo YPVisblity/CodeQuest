@@ -1,0 +1,12 @@
+{
+  "id": "bonus-data-structures",
+  "chapter": "額外挑戰",
+  "level": "支線",
+  "title": "資料結構",
+  "difficulty": "自由挑戰",
+  "story_url": "https://ypvisblity.github.io/chapter_python/ch_1-5/ch34-1.0-web/index.html",
+  "game_url": "http://127.0.0.1:8888/notebooks/chapter-3-level-3.ipynb",
+  "summary": "支線關卡描述",
+  "warn": "返回題目點選按鈕，進入關卡",
+  "unlock_rule": "free"
+}

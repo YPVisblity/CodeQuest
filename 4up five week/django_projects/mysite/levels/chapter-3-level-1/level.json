@@ -1,0 +1,12 @@
+{
+  "id": "chapter-3-level-1",
+  "chapter": "第 3 章第一關",
+  "level": "3-1",
+  "title": "Matplotlib",
+  "difficulty": "60％",
+  "story_url": "https://ypvisblity.github.io/chapter_python/3-1/ch34-1.0-web/index.html",
+  "description": "AI 幫忙寫了畫投資走勢圖的函式，但座標範圍是寫死的，資料筆數一變就出錯，需要修正成根據實際資料動態設定",
+  "summary": "AI 只負責寫程式碼，不負責檢查邏輯是否正確，學生需自行驗證圖表座標範圍的正確性",
+  "warn": "返回題目點選按鈕，進入關卡",
+  "unlock_rule": {"cost": 5, "test_level": "chapter-3-bonus-1"}
+}

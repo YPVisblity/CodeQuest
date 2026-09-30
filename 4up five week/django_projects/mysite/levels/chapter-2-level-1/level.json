@@ -1,0 +1,11 @@
+{
+  "id": "chapter-2-level-1",
+  "chapter": "第 2 章第一關",
+  "level": "2-1",
+  "title": "函式與模組",
+  "difficulty": "40％",
+  "story_url": "https://ypvisblity.github.io/chapter_python/ch_1-4/index.html",
+  "summary": "練習函式參數、回傳值與全域變數作用域",
+  "warn": "返回題目點選按鈕，進入關卡",
+  "unlock_rule": {"cost": 5, "test_level": "chapter-2-bonus-1"}
+}
