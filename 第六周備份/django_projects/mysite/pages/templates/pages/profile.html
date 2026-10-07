@@ -1,0 +1,201 @@
+{% load static %}
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8">
+    <title>個人頁面</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: #f8fafc;
+            font-family: Arial, "Microsoft JhengHei", sans-serif;
+            background: #0f2130;
+            padding: 40px 20px;
+        }
+        .profile-container {
+            max-width: 680px;
+            margin: 0 auto;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #a7f3d0;
+            text-decoration: none;
+            font-weight: 800;
+        }
+        .profile-card {
+            background: #f8fafc;
+            color: #111827;
+            border: 4px solid #0b1220;
+            border-radius: 12px;
+            padding: 28px;
+            box-shadow: 0 18px 0 rgba(0,0,0,0.24);
+        }
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+        .profile-avatar-large {
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #34d399;
+        }
+        .profile-username {
+            font-size: 24px;
+            font-weight: 900;
+            margin: 0;
+        }
+        .profile-points {
+            color: #6b7280;
+            margin: 4px 0 0;
+        }
+        .profile-section {
+            margin-top: 28px;
+            padding-top: 24px;
+            border-top: 2px solid #e5e7eb;
+        }
+        .profile-section h3 {
+            margin: 0 0 14px;
+        }
+        .avatar-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+        }
+        .avatar-option {
+            display: block;
+            width: 100%;
+            padding: 0;
+            border: 3px solid transparent;
+            border-radius: 50%;
+            cursor: pointer;
+            background: none;
+        }
+        .avatar-option img {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .avatar-option.is-selected {
+            border-color: #34d399;
+        }
+        .upload-form {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        input[type="file"] {
+            flex: 1;
+            min-width: 200px;
+        }
+        button {
+            border: 0;
+            border-radius: 8px;
+            padding: 10px 18px;
+            background: #34d399;
+            color: #102018;
+            font-weight: 800;
+            cursor: pointer;
+        }
+        .coming-soon {
+            color: #9ca3af;
+            font-size: 13px;
+        }
+        .background-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 12px;
+        }
+        .background-option {
+            width: 100%;
+            text-align: left;
+        }
+        .background-option img {
+            display: block;
+            width: 100%;
+            height: 70px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            object-fit: cover;
+        }
+        .background-option.is-selected {
+            outline: 3px solid #167853;
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-container">
+        <a class="back-link" href="{% url 'home' %}?view=map">← 返回首頁</a>
+
+        <div class="profile-card">
+            <div class="profile-header">
+                <img src="{{ profile.get_avatar_url }}" alt="頭像" class="profile-avatar-large">
+                <div>
+                    <h2 class="profile-username">{{ user.username }}</h2>
+                    <p class="profile-points">點數：{{ profile.points }}</p>
+                </div>
+            </div>
+
+            <div class="profile-section">
+                <h3>選擇預設頭像</h3>
+                <div class="avatar-grid">
+                    {% for avatar_id in default_avatars %}
+                        <form method="post" style="display:contents;">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="choose_default">
+                            <input type="hidden" name="avatar_choice" value="{{ avatar_id }}">
+                            <button type="submit" class="avatar-option {% if profile.avatar_choice == avatar_id %}is-selected{% endif %}">
+                                <img src="{% static 'pages/images/avatars/' %}{{ avatar_id }}.png" alt="{{ avatar_id }}">
+                            </button>
+                        </form>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="profile-section">
+                <h3>上傳自訂頭像</h3>
+                <form method="post" enctype="multipart/form-data" class="upload-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="upload_custom">
+                    <input type="file" name="avatar" accept="image/*" required>
+                    <button type="submit">上傳並套用</button>
+                </form>
+            </div>
+            <div class="profile-section">
+                <h3>個人橫幅背景</h3>
+                <div class="background-options">
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="choose_background">
+                        <input type="hidden" name="background_id" value="">
+                        <button class="background-option" type="submit">使用預設背景</button>
+                    </form>
+                    {% for item in owned_backgrounds %}
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="choose_background">
+                        <input type="hidden" name="background_id" value="{{ item.id }}">
+                        <button class="background-option {% if profile.selected_background_id == item.id %}is-selected{% endif %}" type="submit">
+                        <img src="{% static item.image %}" alt="">
+                            <span>{{ item.name }}</span>
+                        </button>
+                    </form>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="profile-section">
+                <h3>裝飾特效</h3>
+                <p class="coming-soon">留言邊框、徽章功能即將推出</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

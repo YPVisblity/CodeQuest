@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8">
+    <title>我的提交記錄</title>
+    <style>
+        body { background: #0f2130; color: #f8fafc; font-family: Arial, sans-serif; padding: 40px; }
+        h1 { color: #facc15; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px 16px; border-bottom: 1px solid #1e3a50; text-align: left; }
+        th { background: #111827; color: #a9b1d6; }
+        tr:hover { background: #1a2a3a; }
+        .pass { color: #34d399; }
+        .fail { color: #f7768e; }
+        .back { 
+            display: inline-block; padding: 10px 18px; 
+            background: #334155; border-radius: 8px; 
+            color: #f8fafc; text-decoration: none; margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <a class="back" href="{% url 'home' %}?view=map">← 返回首頁</a>
+    <h1>{{ request.user.username }} 的提交記錄</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>時間</th>
+                <th>關卡</th>
+                <th>檔案名稱</th>
+                <th>結果</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in submissions %}
+            <tr>
+                <td>{{ s.submitted_at|date:"Y/m/d H:i:s" }}</td>
+                <td>{{ s.level }}</td>
+                <td>{{ s.filename }}</td>
+                <td>
+                    {% if s.passed is None %}
+                        <span style="color:#a9b1d6">未鑑定</span>
+                    {% elif s.passed %}
+                        <span class="pass">通過</span>
+                    {% else %}
+                        <span class="fail">未通過</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" style="color:#565f89">尚無提交記錄</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

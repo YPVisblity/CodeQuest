@@ -1,0 +1,1 @@
+請仿照範例中的 `preorder`，完成 `inorder` 與 `postorder` 兩個走訪函式。
