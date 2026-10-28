@@ -1,0 +1,193 @@
+{% load tz %}
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>我的提交記錄</title>
+    <style>
+        body { background: #0f2130; color: #f8fafc; font-family: Arial, sans-serif; padding: 40px; }
+        h1 { color: #facc15; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px 16px; border-bottom: 1px solid #1e3a50; text-align: left; }
+        th { background: #111827; color: #a9b1d6; }
+        tr:hover { background: #1a2a3a; }
+        .pass { color: #34d399; }
+        .fail { color: #f7768e; }
+        .back { 
+            display: inline-block; padding: 10px 18px; 
+            background: #334155; border-radius: 8px; 
+            color: #f8fafc; text-decoration: none; margin-bottom: 20px;
+        }
+        .trend-card { margin: 24px 0; padding: 24px; background: #132b3d; border: 1px solid #29465c; border-radius: 16px; }
+        .trend-card h2 { margin-top: 0; }
+        .trend-note { color: #bbc8d8; line-height: 1.7; }
+        .trend-legend { display: flex; flex-wrap: wrap; gap: 12px 24px; margin: 20px 0; }
+        .trend-image { display: block; width: 100%; height: auto; min-width: 560px; }
+        .table-scroll, .chart-scroll { overflow-x: auto; }
+        .trend-filter { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 12px; margin: 20px 0 0; }
+        .trend-filter button { font: inherit; min-height: 44px; padding: 10px 20px; border: 1px solid #52728a; border-radius: 8px; color: #f8fafc; background: #203e54; cursor: pointer; }
+        .trend-filter button:hover { border-color: #7dd3fc; }
+        .trend-filter button[aria-pressed="true"] { color: #0f2130; background: #7dd3fc; border-color: #7dd3fc; font-weight: bold; }
+        .trend-filter button:focus-visible { outline: 2px solid #facc15; outline-offset: 4px; }
+        .trend-filter button:disabled { cursor: wait; opacity: 0.65; }
+        .chart-type-filter { justify-content: flex-start; margin: 0 0 20px; }
+        @media (max-width: 600px) {
+            body { padding: 16px; margin: 0; }
+            h1 { font-size: 25px; overflow-wrap: anywhere; }
+            .trend-card { padding: 16px; }
+            th, td { padding: 10px; }
+        }
+    </style>
+</head>
+<body>
+    
+    <a class="back" href="{% url 'home' %}?view=map">← 返回首頁</a>
+    <h1>{{ request.user.username }} 的提交記錄</h1>
+    <!-- 折線圖區域 -->
+    <section class="trend-card" aria-labelledby="trend-heading">
+        <!-- 切換圖表 表單 -->
+        <form id="chart-type-form" class="trend-filter chart-type-filter" method="get" action="{% url 'submissions' %}#trend-heading" aria-label="切換圖表">
+            <input type="hidden" name="days" value="{{ days }}">
+            <!-- 題目折線圖 -->
+            <button type="submit" name="chart" value="submissions" aria-pressed="{% if chart_type == 'submissions' %}true{% else %}false{% endif %}">做題趨勢</button>
+            <!-- ai折線圖 -->
+            <button type="submit" name="chart" value="ai" aria-pressed="{% if chart_type == 'ai' %}true{% else %}false{% endif %}">AI 使用次數</button>
+        </form>
+        <!-- 標題 -->
+        <h2 id="trend-heading">{{ chart_details.title }}</h2>
+        <!-- tips&日期 -->
+        <p class="trend-note">
+            <span id="trend-dates">{{ trend_start|date:"Y/m/d" }} — {{ trend_end|date:"Y/m/d" }}</span><br>
+            <span id="trend-note">{{ chart_details.note }}</span>
+        </p>
+        <!-- 計數區 -->
+        <p id="trend-totals">{{ chart_details.summary }}</p>
+        <!-- 線 -->
+        <div class="trend-legend">
+            <span id="trend-primary-legend" style="color: {{ chart_details.legend_color }};">{{ chart_details.legend_label }}</span>
+            <span id="trend-solved-legend" style="color: #34d399;"{% if chart_type == 'ai' %} hidden{% endif %}>┄ 通過題數</span>
+        </div>
+        <!-- 無提交 -->
+        <p id="trend-empty"{% if total_count %} hidden{% endif %}>{{ chart_details.empty_message }}</p>
+        <!-- 折線圖 -->
+        <div class="chart-scroll">
+            <img class="trend-image" src="data:image/png;base64,{{ chart_image }}"
+                 alt="">
+        </div>
+        <!-- 切換期限 -->
+        <form id="trend-days-form" class="trend-filter" method="get" action="{% url 'submissions' %}#trend-heading" aria-label="切換統計天數">
+            <input type="hidden" name="chart" value="{{ chart_type }}">
+            {% for option in day_options %}
+                <button type="submit" name="days" value="{{ option }}" aria-pressed="{% if option == days %}true{% else %}false{% endif %}">{{ option }} 天</button>
+            {% endfor %}
+        </form>
+    </section>
+    <h2>詳細提交紀錄</h2>
+    <p class="trend-note">以下顯示所有提交紀錄，時間以台灣時間呈現。</p>
+    <div class="table-scroll">
+    <table>
+        <thead>
+            <tr>
+                <th>時間</th>
+                <th>關卡</th>
+                <th>檔案名稱</th>
+                <th>結果</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in submissions %}
+            <tr>
+                <td>{{ s.submitted_at|timezone:"Asia/Taipei"|date:"Y/m/d H:i:s" }}</td>
+                <td>{{ s.level }}</td>
+                <td>{{ s.filename }}</td>
+                <td>
+                    {% if s.passed is None %}
+                        <span style="color:#a9b1d6">未鑑定</span>
+                    {% elif s.passed %}
+                        <span class="pass">通過</span>
+                    {% else %}
+                        <span class="fail">未通過</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" style="color:#565f89">尚無提交記錄</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    <script type="module">
+        const card = document.querySelector(".trend-card");
+        const typeForm = document.getElementById("chart-type-form");
+        const daysForm = document.getElementById("trend-days-form");
+        const buttons = [...card.querySelectorAll("button[name='days'], button[name='chart']")];
+        const chart = document.querySelector(".trend-image");
+        const chartArea = document.querySelector(".chart-scroll");
+        let loading = false;
+
+        card.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const form = event.target;
+            const button = event.submitter;
+            if (!button || loading || button.getAttribute("aria-pressed") === "true") return;
+
+            loading = true;
+            buttons.forEach(item => { item.disabled = true; });
+            chartArea.setAttribute("aria-busy", "true");
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 20000);
+
+            try {
+                const url = new URL(form.action, window.location.href);
+                url.hash = "";
+                url.searchParams.set("days", button.name === "days" ? button.value : typeForm.elements.days.value);
+                url.searchParams.set("chart", button.name === "chart" ? button.value : daysForm.elements.chart.value);
+                const response = await fetch(url, {
+                    headers: { "X-Requested-With": "XMLHttpRequest" },
+                    credentials: "same-origin",
+                    cache: "no-store",
+                    signal: controller.signal,
+                });
+                if (response.redirected || !response.ok) return;
+                const data = await response.json();
+
+                // 等圖片準備好後再一起更新，載入失敗時保留原本的圖表。
+                const nextImage = new Image();
+                nextImage.src = `data:image/png;base64,${data.chart_image}`;
+                await nextImage.decode();
+                chart.src = nextImage.src;
+                document.getElementById("trend-heading").textContent = data.chart_details.title;
+                document.getElementById("trend-dates").textContent = `${data.trend_start} — ${data.trend_end}`;
+                document.getElementById("trend-note").textContent = data.chart_details.note;
+                document.getElementById("trend-totals").textContent = data.chart_details.summary;
+                const primaryLegend = document.getElementById("trend-primary-legend");
+                primaryLegend.textContent = data.chart_details.legend_label;
+                primaryLegend.style.color = data.chart_details.legend_color;
+                document.getElementById("trend-solved-legend").hidden = data.chart_type === "ai";
+                const emptyMessage = document.getElementById("trend-empty");
+                emptyMessage.textContent = data.chart_details.empty_message;
+                emptyMessage.hidden = data.total_count > 0;
+                buttons.forEach(item => {
+                    const selectedValue = item.name === "days" ? String(data.days) : data.chart_type;
+                    item.setAttribute("aria-pressed", String(item.value === selectedValue));
+                });
+                typeForm.elements.days.value = data.days;
+                daysForm.elements.chart.value = data.chart_type;
+                const pageUrl = new URL(window.location.href);
+                pageUrl.searchParams.set("days", data.days);
+                pageUrl.searchParams.set("chart", data.chart_type);
+                window.history.replaceState(null, "", pageUrl);
+            } catch {
+                // 保留原圖與所選天數，讓使用者可以再次點擊重試。
+            } finally {
+                clearTimeout(timeout);
+                loading = false;
+                buttons.forEach(item => { item.disabled = false; });
+                chartArea.setAttribute("aria-busy", "false");
+                button.focus({ preventScroll: true });
+            }
+        });
+    </script>
+</body>
+</html>
