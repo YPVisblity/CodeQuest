@@ -5,7 +5,25 @@ REM Keep this file in mysite/ (same folder as manage.py and Caddyfile)
 cd /d "%~dp0"
 
 REM ---- settings ----
-set "PYTHON=C:\Users\Admin\anaconda3\envs\pythonclean\python.exe"
+REM Python: auto-detect conda env "pythonclean" (set PYTHON here to force a path)
+set "PYTHON="
+for %%P in (
+    "%USERPROFILE%\anaconda3\envs\pythonclean\python.exe"
+    "%USERPROFILE%\miniconda3\envs\pythonclean\python.exe"
+    "%LOCALAPPDATA%\anaconda3\envs\pythonclean\python.exe"
+    "%LOCALAPPDATA%\miniconda3\envs\pythonclean\python.exe"
+    "C:\ProgramData\anaconda3\envs\pythonclean\python.exe"
+    "C:\ProgramData\miniconda3\envs\pythonclean\python.exe"
+) do if not defined PYTHON if exist %%P set "PYTHON=%%~P"
+if not defined PYTHON (
+    echo Cannot find conda env "pythonclean".
+    echo Create it:  conda env create -f pythonclean.yaml
+    echo or edit PYTHON in start.bat.
+    pause
+    exit /b 1
+)
+echo Python: %PYTHON%
+
 REM Must match Caddyfile: ":8000" and "reverse_proxy 127.0.0.1:8001"
 set "CADDY_PORT=8000"
 set "DJANGO_PORT=8001"
