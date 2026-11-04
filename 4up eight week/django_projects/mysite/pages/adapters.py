@@ -1,11 +1,8 @@
-from urllib.parse import urlencode
-
 from allauth.core.exceptions import ImmediateHttpResponse
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.shortcuts import redirect
-from django.urls import reverse
 
 
 class SocialAccountAdapter(DefaultSocialAccountAdapter):
@@ -21,8 +18,3 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
                 "再到「個人頁面」連結 Google，之後就能直接用 Google 登入。",
             )
             raise ImmediateHttpResponse(redirect("login"))
-
-        # 走到這裡代表是「第一次用 Google 登入」，接下來會自動建立新帳號。
-        # 建好後先帶去設定 CodeQuest 密碼，設定完（或跳過）再回到原本要去的頁面。
-        next_url = sociallogin.state.get("next") or "/"
-        sociallogin.state["next"] = reverse("set_password") + "?" + urlencode({"next": next_url})

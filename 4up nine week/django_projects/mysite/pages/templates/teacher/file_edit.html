@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>審查 {{ filename }}</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            color: #111827;
+            font-family: Arial, "Microsoft JhengHei", sans-serif;
+            background: #eef6f2;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 22px clamp(18px, 4vw, 44px);
+            border-bottom: 4px solid #111827;
+            background: #ffffff;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 24px;
+            letter-spacing: 0;
+            overflow-wrap: anywhere;
+        }
+
+        main {
+            width: min(1100px, calc(100vw - 32px));
+            margin: 24px auto;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 68vh;
+            padding: 16px;
+            border: 4px solid #111827;
+            border-radius: 8px;
+            font: 15px Consolas, "Courier New", monospace;
+            line-height: 1.55;
+            resize: vertical;
+            background: #f9fafb;
+        }
+
+        .actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 14px;
+        }
+
+        a,
+        button {
+            border-radius: 8px;
+            font-weight: 800;
+            text-decoration: none;
+        }
+
+        a {
+            color: #0f766e;
+        }
+
+        button {
+            border: 0;
+            padding: 13px 20px;
+            color: #102018;
+            background: #34d399;
+            box-shadow: 0 8px 0 #167853;
+            cursor: pointer;
+        }
+
+        .message {
+            margin-bottom: 14px;
+            padding: 12px;
+            border-radius: 8px;
+            color: #14532d;
+            background: #dcfce7;
+            font-weight: 800;
+        }
+
+        .review-result {
+            margin-bottom: 18px;
+            border: 4px solid #111827;
+            border-radius: 8px;
+            background: #ffffff;
+        }
+
+        .review-result h2 {
+            margin: 0;
+            padding: 14px;
+            color: #ffffff;
+            background: #111827;
+            font-size: 20px;
+            letter-spacing: 0;
+        }
+
+        .review-body {
+            padding: 14px;
+        }
+
+        .status-pass {
+            color: #047857;
+            font-weight: 800;
+        }
+
+        .status-fail {
+            color: #b91c1c;
+            font-weight: 800;
+        }
+
+        .status-skip {
+            color: #92400e;
+            font-weight: 800;
+        }
+
+        .message-text {
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>審查：{{ filename }}</h1>
+        <a href="{% url 'teacher_files' %}">返回檔案列表</a>
+    </header>
+    <main>
+        {% if message %}
+            <div class="message">{{ message }}</div>
+        {% endif %}
+        {% if review_result %}
+            <section class="review-result">
+                <h2>PyBryt 評測結果</h2>
+                <div class="review-body">
+                    <p>
+                        <strong>{{ review_result.filename }}</strong>
+                        {% if review_result.passed == True %}
+                            <span class="status-pass">通過</span>
+                        {% elif review_result.passed == False %}
+                            <span class="status-fail">未通過</span>
+                        {% else %}
+                            <span class="status-skip">未評測</span>
+                        {% endif %}
+                    </p>
+                    <p>關卡：{{ review_result.level }}{% if review_result.steps %}，執行步數：{{ review_result.steps }}{% endif %}</p>
+                    {% if review_result.messages %}
+                        <p class="message-text">{{ review_result.messages }}</p>
+                    {% endif %}
+                    {% if review_result.feedback %}
+                        <ul>
+                            {% for item in review_result.feedback %}
+                                <li>
+                                    {% if item.passed %}通過{% else %}未通過{% endif %}
+                                    {{ item.name }}{% if item.message %}：{{ item.message }}{% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </section>
+        {% endif %}
+        <form method="post">
+            {% csrf_token %}
+            <textarea name="content" spellcheck="false" readonly>{{ content }}</textarea>
+            <div class="actions">
+                <a href="{% url 'teacher_files' %}">取消</a>
+                <button type="submit">評測檔案</button>
+            </div>
+        </form>
+    </main>
+    {% if review_result %}
+        <script>
+            alert("PyBryt 評測結果：{% if review_result.passed == True %}通過{% elif review_result.passed == False %}未通過{% else %}未評測{% endif %}");
+        </script>
+    {% endif %}
+</body>
+</html>

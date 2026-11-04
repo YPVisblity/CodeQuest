@@ -1,0 +1,235 @@
+{
+  "bonus-data-structures-1": {
+    "append": "append三個元素後的串列正確",
+    "insert": "insert_at後的串列正確",
+    "delete": "delete_by_value後的串列正確"
+  },
+  "bonus-data-structures-10": {
+    "two_children": "正確刪除有兩個子節點的節點",
+    "leaf": "正確刪除葉節點/單一子節點的節點"
+  },
+  "bonus-data-structures-11": {
+    "bfs": "BFS 拜訪順序正確"
+  },
+  "bonus-data-structures-12": {
+    "shortest_path_valid": "找到一條合法的最短路徑",
+    "same_node": "起點等於終點時正確回傳",
+    "unreachable": "正確處理無法到達的節點"
+  },
+  "bonus-data-structures-2": {
+    "reverse": "串列反轉正確"
+  },
+  "bonus-data-structures-3": {
+    "peek": "正確查看堆疊頂端",
+    "pop1": "正確取出最後加入的元素",
+    "pop2": "正確取出剩餘元素",
+    "empty": "正確判斷空堆疊",
+    "balanced1": "正確辨識配對括號",
+    "balanced2": "正確辨識交錯括號",
+    "balanced3": "正確辨識未閉合括號",
+    "balanced4": "正確處理空字串"
+  },
+  "bonus-data-structures-4": {
+    "parentheses": "含括號的中序式轉換正確",
+    "precedence": "運算優先順序處理正確"
+  },
+  "bonus-data-structures-5": {
+    "peek": "peek回傳第一個元素正確",
+    "dequeue1": "dequeue第一個元素正確",
+    "dequeue2": "dequeue第二個元素正確",
+    "empty": "is_empty回傳True正確",
+    "print_jobs": "simulate_print_jobs結果正確"
+  },
+  "bonus-data-structures-6": {
+    "stack_in_type": "正確使用輸入堆疊",
+    "stack_out_type": "正確使用輸出堆疊",
+    "lazy_transfer": "正確延遲轉移元素",
+    "dequeue1": "第一次取出順序正確",
+    "transferred_all": "正確轉移全部元素",
+    "dequeue2": "第二次取出順序正確",
+    "dequeue3": "第三次取出順序正確",
+    "dequeue4": "第四次取出順序正確"
+  },
+  "bonus-data-structures-7": {
+    "inorder": "通過：中序走訪順序正確（左→根→右）",
+    "postorder": "通過：後序走訪順序正確（左→右→根）"
+  },
+  "bonus-data-structures-8": {
+    "level_order": "通過：層序走訪順序正確",
+    "empty_tree": "正確處理空樹"
+  },
+  "bonus-data-structures-9": {
+    "search1": "找到正確的中間節點",
+    "search2": "找到正確的葉節點",
+    "search3": "正確判斷較大的值不存在",
+    "search4": "正確判斷較小的值不存在"
+  },
+  "chapter-1-level-1-1": {
+    "case1": "蘋果價格計算正確",
+    "case2": "第二組乘法計算正確",
+    "case3": "第三組乘法計算正確",
+    "case4": "正確處理數量為零",
+    "case5": "正確處理負數情況",
+    "case6": "正確處理單價為零"
+  },
+  "chapter-1-level-1-2": {
+    "case1": "型別轉換與字串組合正確",
+    "case2": "不同數值測試正確",
+    "case3": "邊界數值測試正確"
+  },
+  "chapter-1-level-1-3": {
+    "case1": "計算與四捨五入正確",
+    "case2": "不同數值測試正確",
+    "case3": "小數精度處理正確",
+    "case4": "正確處理 people 為0的情況"
+  },
+  "chapter-1-level-1-4": {
+    "numbers": "數值交換正確",
+    "negative": "正負數交換正確",
+    "strings": "字串交換正確"
+  },
+  "chapter-1-level-2-1": {
+    "case1": "正常",
+    "case2": "過輕",
+    "case3": "過重"
+  },
+  "chapter-1-level-2-2": {
+    "grades": "所有分數的等級都判斷正確"
+  },
+  "chapter-1-level-2-3": {
+    "leap_years": "所有年份都判斷正確"
+  },
+  "chapter-1-level-3-1": {
+    "case1": "矩陣相加成功",
+    "case2": "不同數值測試成功"
+  },
+  "chapter-1-level-3-2": {
+    "case1": "二乘二矩陣加總正確",
+    "case2": "二乘三矩陣加總正確",
+    "case3": "單欄矩陣加總正確"
+  },
+  "chapter-1-level-3-3": {
+    "case1": "正數矩陣最大值正確",
+    "case2": "負數矩陣最大值正確",
+    "case3": "單欄矩陣最大值正確"
+  },
+  "chapter-1-level-3-4": {
+    "positive_difference": "正公差等差數列正確",
+    "negative_difference": "不同首項與負公差也能正確產生數列"
+  },
+  "chapter-2-bonus-1": {
+    "search1": "找到正確的中間節點",
+    "search2": "找到正確的葉節點",
+    "search3": "正確判斷較大的值不存在",
+    "search4": "正確判斷較小的值不存在"
+  },
+  "chapter-2-level-1-1": {
+    "first_history": "成功使用函式持續更新全域分數",
+    "second_history": "更換初始分數後仍能正確更新，沒有將分數寫死"
+  },
+  "chapter-2-level-2-1": {
+    "zero_divisor": "except方法正確",
+    "wrong_type": "except方法正確",
+    "valid_division": "a除以b正確"
+  },
+  "chapter-2-level-2-2": {
+    "missing_file": "正確捕捉 FileNotFoundError",
+    "invalid_content": "正確捕捉 ValueError",
+    "valid_file1": "正確讀取並轉換分數",
+    "valid_file2": "不同檔案也能正確讀取"
+  },
+  "chapter-2-level-3-1": {
+    "status": "函式正確回傳狀態碼",
+    "requested_url": "正確使用傳入的網址",
+    "has_user_agent": "已帶入 User-Agent",
+    "browser_user_agent": "User-Agent 格式符合瀏覽器"
+  },
+  "chapter-2-level-3-2": {
+    "case1": "正確抓取多個h2並保持順序",
+    "case2": "正確過濾非h2標籤",
+    "case3": "正確處理空結果"
+  },
+  "chapter-3-level-1-1": {
+    "xlim1": "X軸範圍正確對應到資料的月份範圍",
+    "ylim1": "Y軸範圍正確對應到資料的數值範圍",
+    "xlim2": "換一組資料後X軸範圍仍正確，證明沒有寫死",
+    "ylim2": "換一組資料後Y軸範圍仍正確"
+  },
+  "chapter-3-level-1-2": {
+    "legend1": "圖例正確標示股票與基金",
+    "lines1": "正確畫出兩條線",
+    "line_data1": "第一組折線資料正確",
+    "legend2": "換一組資料後圖例仍正確",
+    "lines2": "第二組折線數量正確",
+    "line_data2": "第二組折線資料正確"
+  },
+  "chapter-3-level-1-3": {
+    "count1": "第一組折線數量正確",
+    "data1": "第一組折線座標正確",
+    "labels1": "第一組圖表標題與軸名稱正確",
+    "count2": "第二組折線數量正確",
+    "data2": "更換資料後仍能正確繪圖",
+    "labels2": "第二組圖表標題與軸名稱正確"
+  },
+  "chapter-3-level-1-4": {
+    "heights1": "第一組長條高度正確",
+    "fruits1": "第一組水果名稱正確",
+    "labels1": "第一組圖表標題與軸名稱正確",
+    "heights2": "第二組長條高度正確",
+    "fruits2": "第二組水果名稱正確",
+    "labels2": "第二組圖表標題與軸名稱正確"
+  },
+  "chapter-3-level-1-5": {
+    "points1": "第一組散點座標正確",
+    "labels1": "第一組圖表標題與軸名稱正確",
+    "points2": "第二組散點座標正確",
+    "labels2": "第二組圖表標題與軸名稱正確"
+  },
+  "chapter-3-level-1-6": {
+    "count1": "第一組圓餅區塊數量正確",
+    "labels1": "第一組活動標籤正確",
+    "ratios1": "第一組活動比例正確",
+    "title1": "第一組圖表標題正確",
+    "count2": "第二組圓餅區塊數量正確",
+    "labels2": "第二組活動標籤正確",
+    "ratios2": "第二組活動比例正確",
+    "title2": "第二組圖表標題正確"
+  },
+  "chapter-3-level-2-1": {
+    "case1": "正確判定完整檔案",
+    "case2": "正確偵測非mp4格式",
+    "case3": "正確偵測檔案大小異常",
+    "case4": "正確偵測校驗碼異常",
+    "case5": "正確依優先順序（格式錯誤>檔案損毀>校驗失敗）回傳"
+  },
+  "chapter-3-level-2-2": {
+    "mixed": "正確統計出2支成功、3支失敗",
+    "all_valid": "正確統計全部成功的情況",
+    "empty": "正確處理空影片庫的情況"
+  },
+  "chapter-3-level-3-1": {
+    "case1": "正確過濾None，保留其他數值",
+    "case2": "正確處理全空的情況",
+    "case3": "正確保留數值0"
+  },
+  "chapter-3-level-3-2": {
+    "case1": "正確過濾並計算平均",
+    "case2": "正確處理除以零的邊界情況",
+    "case3": "正確計算平均值"
+  },
+  "chapter-4-level-1-1": {
+    "gray": "成功將BGR圖片轉換成單通道灰階圖片",
+    "binary": "成功使用Otsu方法將灰階圖片二值化",
+    "contours": "成功在原圖副本上以紅色、厚度2繪製全部輪廓"
+  },
+  "chapter-4-level-2-1": {
+    "result": "音訊與影片播放工作皆已完成",
+    "threads": "成功建立AudioThread與VideoThread同步執行影音工作"
+  },
+  "chapter-4-level-3-1": {
+    "valid": "文字轉語音流程執行完成",
+    "tts_parameters": "正確傳入繁體中文文字、zh-TW語言及MP3路徑",
+    "empty": "正確阻止空白文字轉換成語音",
+    "invalid_extension": "正確阻止非MP3格式的輸出"
+  }
+}

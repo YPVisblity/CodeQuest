@@ -1,0 +1,311 @@
+{% load socialaccount %}
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>登入 Code Quest</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            display: grid;
+            min-height: 100vh;
+            margin: 0;
+            padding: 24px 0;
+            place-items: center;
+            color: #f8fafc;
+            font-family: Arial, "Microsoft JhengHei", sans-serif;
+            background:
+                linear-gradient(135deg, rgba(16, 37, 54, 0.94), rgba(7, 18, 30, 0.9)),
+                repeating-linear-gradient(45deg, transparent 0 96px, rgba(255, 255, 255, 0.045) 96px 99px, transparent 99px 192px),
+                #13586b;
+        }
+
+        .login-card {
+            width: min(420px, calc(100vw - 32px));
+            padding: 28px;
+            border: 5px solid #0b1220;
+            border-radius: 8px;
+            background: #f8fafc;
+            color: #111827;
+            box-shadow: 0 18px 0 rgba(0, 0, 0, 0.24);
+        }
+
+        .card-header {
+            margin-bottom: 22px;
+            text-align: center;
+        }
+
+        .card-icon {
+            display: inline-grid;
+            width: 52px;
+            height: 52px;
+            margin-bottom: 12px;
+            place-items: center;
+            border: 3px solid #111827;
+            border-radius: 8px;
+            background: #dbeafe;
+            color: #1e3a8a;
+            box-shadow: 0 5px 0 #111827;
+        }
+
+        h1 {
+            margin: 0 0 6px;
+            font-size: 30px;
+            letter-spacing: 0;
+        }
+
+        .subtitle {
+            margin: 0;
+            color: #6b7280;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 800;
+        }
+
+        input {
+            width: 100%;
+            margin-bottom: 16px;
+            padding: 12px;
+            border: 3px solid #111827;
+            border-radius: 8px;
+            font: inherit;
+        }
+
+        input::placeholder {
+            color: #9ca3af;
+        }
+
+        .password-field {
+            position: relative;
+        }
+
+        .password-field input {
+            margin-bottom: 0;
+            padding-right: 48px;
+        }
+
+        .toggle-password {
+            position: absolute;
+            top: 50%;
+            right: 8px;
+            display: grid;
+            width: 34px;
+            height: 34px;
+            place-items: center;
+            padding: 0;
+            border: 0;
+            border-radius: 6px;
+            background: transparent;
+            color: #6b7280;
+            transform: translateY(-50%);
+            cursor: pointer;
+        }
+
+        .toggle-password:hover {
+            color: #111827;
+        }
+
+        /* 密碼顯示中時加上斜線，表示「點了會隱藏」 */
+        .toggle-password .eye-slash {
+            display: none;
+        }
+
+        .toggle-password.is-visible .eye-slash {
+            display: inline;
+        }
+
+        .forgot-row {
+            margin: 10px 0 22px;
+            text-align: right;
+        }
+
+        .error {
+            margin-bottom: 16px;
+            padding: 12px;
+            border-radius: 8px;
+            color: #7f1d1d;
+            background: #fee2e2;
+            font-weight: 800;
+        }
+
+        a {
+            color: #2563eb;
+            font-weight: 800;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .forgot-row a {
+            font-size: 14px;
+        }
+
+        .btn {
+            display: flex;
+            width: 100%;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 13px 20px;
+            border-radius: 8px;
+            font: inherit;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            border: 0;
+            color: #102018;
+            background: #34d399;
+            box-shadow: 0 8px 0 #167853;
+        }
+
+        .btn-google {
+            border: 3px solid #111827;
+            color: #111827;
+            background: #fff;
+            box-shadow: 0 8px 0 #9ca3af;
+        }
+
+        .btn-google img {
+            width: 18px;
+            height: 18px;
+        }
+
+        .btn:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 30px 0 18px;
+            color: #9ca3af;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .divider::before,
+        .divider::after {
+            flex: 1;
+            height: 2px;
+            background: #e5e7eb;
+            content: "";
+        }
+
+        .footer {
+            margin-top: 28px;
+            text-align: center;
+            color: #4b5563;
+            font-weight: 700;
+        }
+
+        .footer p {
+            margin: 0 0 8px;
+        }
+
+        .footer .back-link {
+            color: #6b7280;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <main class="login-card">
+        <div class="card-header">
+            <div class="card-icon" aria-hidden="true">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="8" r="4"></circle>
+                    <path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"></path>
+                </svg>
+            </div>
+            <h1>歡迎回來</h1>
+            <p class="subtitle">登入你的帳號以繼續</p>
+        </div>
+        
+        {% for message in messages %}
+            {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+                <div class="error">{{ message }}</div>
+            {% endif %}
+        {% endfor %}
+
+        {% if form.errors %}
+            <div class="error">
+                {% if form.non_field_errors %}
+                    {% for error in form.non_field_errors %}
+                        <div>{{ error }}</div>
+                    {% endfor %}
+                {% else %}
+                    帳號或密碼不正確，請再試一次。
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            <label for="id_username">使用者名稱或Email</label>
+            <input type="text" name="username" id="id_username" value="{{ form.username.value|default_if_none:'' }}"
+                   maxlength="150" autocomplete="username" autofocus required placeholder="請輸入使用者名稱或Email">
+
+            <label for="id_password">密碼</label>
+            <div class="password-field">
+                <input type="password" name="password" id="id_password"
+                       autocomplete="current-password" required placeholder="請輸入密碼">
+                <button type="button" class="toggle-password" aria-label="顯示密碼">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <line class="eye-slash" x1="3" y1="3" x2="21" y2="21"></line>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="forgot-row">
+                <a href="{% url 'password_reset' %}">忘記密碼？</a>
+            </div>
+
+            <button type="submit" class="btn btn-primary">登入</button>
+        </form>
+
+        <div class="divider">或使用其他方式</div>
+
+        <form method="post" action="{% provider_login_url 'google' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-google">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="">
+                使用 Google 登入
+            </button>
+        </form>
+
+        <div class="footer">
+            <p>還沒有帳號？ <a href="{% url 'register' %}">立即註冊</a></p>
+            <a class="back-link" href="/">返回首頁</a>
+        </div>
+    </main>
+    <script>
+        // 密碼欄右邊的眼睛：切換顯示／隱藏密碼
+        document.querySelectorAll(".toggle-password").forEach(button => {
+            button.addEventListener("click", () => {
+                const input = button.previousElementSibling;
+                const show = input.type === "password";
+                input.type = show ? "text" : "password";
+                button.classList.toggle("is-visible", show);
+                button.setAttribute("aria-label", show ? "隱藏密碼" : "顯示密碼");
+            });
+        });
+    </script>
+</body>
+</html>

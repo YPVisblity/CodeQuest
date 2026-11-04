@@ -1,0 +1,26 @@
+# 在 mysite/ 底下執行 `caddy run`，路徑都相對於這個資料夾
+{
+	servers {
+		# ngrok 從本機連進來，信任它帶的 X-Forwarded-Proto: https
+		# （settings.py 的 SECURE_PROXY_SSL_HEADER 靠這個判斷 HTTPS）
+		trusted_proxies static private_ranges
+	}
+}
+
+:8000 {
+	encode gzip
+
+	handle_path /static/* {
+		root * staticfiles
+		file_server
+	}
+
+	handle_path /media/* {
+		root * media
+		file_server
+	}
+
+	handle {
+		reverse_proxy 127.0.0.1:8001
+	}
+}

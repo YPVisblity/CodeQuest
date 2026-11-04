@@ -1,0 +1,24 @@
+# 在 mysite/ 底下執行 `caddy run`，路徑都相對於這個資料夾
+{
+	servers {
+		# ngrok 從本機連進來，信任它帶的 X-Forwarded-Proto: https
+		# （settings.py 的 SECURE_PROXY_SSL_HEADER 靠這個判斷 HTTPS）
+		trusted_proxies static private_ranges
+	}
+}
+
+:8000 {
+	encode gzip
+
+	handle_path /static/* {
+		root * staticfiles
+		file_server
+	}
+
+	# 不再直接公開 /media：自訂頭像改由 Django 的 /profile/avatar/<user_id>/ 提供
+	# （需登入、會檢查圖片格式），media/ 底下目前也只有頭像。
+
+	handle {
+		reverse_proxy 127.0.0.1:8001
+	}
+}
